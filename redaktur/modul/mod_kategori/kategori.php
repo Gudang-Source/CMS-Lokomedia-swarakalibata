@@ -10,11 +10,11 @@ function confirmdelete(delUrl) {
 <?php
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_kategori/aksi_kategori.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 //update/////////////////////////////////////
 
   // Tampil kategori
@@ -52,17 +52,17 @@ echo "<div class=grid_12>
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM kategori ORDER BY id_kategori DESC");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM kategori ORDER BY id_kategori DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM kategori 
+      $tampil=mysqli_query($conn,"SELECT * FROM kategori 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_kategori DESC");
     }
   
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
+    while($r=mysqli_fetch_array($tampil)){
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -86,9 +86,9 @@ echo "<div class=grid_12>
    
   <a href=?module=kategori&act=editkategori&id=$r[id_kategori] title='Edit' class='with-tip'>
   <center><img src='img/edit.png'></a>
-   
+   &nbsp;
   <a href=javascript:confirmdelete('$aksi?module=kategori&act=hapus&id=$r[id_kategori]') title='Hapus' class='with-tip'>
-  &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+  <img src='img/hapus.png'></center></a> 
    
   </td></tr>";
   
@@ -96,11 +96,11 @@ echo "<div class=grid_12>
       }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM kategori"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM kategori"));
       }
         else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM kategori WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM kategori WHERE username='$_SESSION[namauser]'"));
       }  
       break;    
       }
@@ -116,18 +116,18 @@ echo " <table id='table-example' class='table'>
      </thead>
      <tbody>";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM kategori WHERE nama_kategori LIKE '%$_GET[kata]%' ORDER BY id_kategori DESC");
+      if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM kategori WHERE nama_kategori LIKE '%$_GET[kata]%' ORDER BY id_kategori DESC");
       }
       else{
-      $tampil=mysql_query("SELECT * FROM kategori 
+      $tampil=mysqli_query($conn,"SELECT * FROM kategori 
                            WHERE username='$_SESSION[namauser]'
                            AND nama_kategori LIKE '%$_GET[kata]%'       
                            ORDER BY id_kategori DESC");
       }
   
       $no = $posisi+1;
-      while($r=mysql_fetch_array($tampil)){
+      while($r=mysqli_fetch_array($tampil)){
 echo "<tr class=gradeX> 
   <td><center>$no</center></td>
   <td>$r[nama_kategori]</td>
@@ -148,11 +148,11 @@ echo "<tr class=gradeX>
      }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM kategori WHERE nama_kategori LIKE '%$_GET[kata]%'"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM kategori WHERE nama_kategori LIKE '%$_GET[kata]%'"));
       }
       else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM kategori WHERE username='$_SESSION[namauser]' AND nama_kategori LIKE '%$_GET[kata]%'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM kategori WHERE username='$_SESSION[namauser]' AND nama_kategori LIKE '%$_GET[kata]%'"));
       }  
       break;    
       }
@@ -185,11 +185,11 @@ echo "</tbody></table> ";
       <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=kategori'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=kategori'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 	  
@@ -197,8 +197,8 @@ echo "</tbody></table> ";
   
   // Form Edit Kategori  
   case "editkategori":
-  $edit=mysql_query("SELECT * FROM kategori WHERE id_kategori='$_GET[id]'");
-  $r=mysql_fetch_array($edit);
+  $edit=mysqli_query($conn,"SELECT * FROM kategori WHERE id_kategori='$_GET[id]'");
+  $r=mysqli_fetch_array($edit);
 
   
   echo "
@@ -221,7 +221,7 @@ echo "</tbody></table> ";
    <input type=text name='nama_kategori' value='$r[nama_kategori]' size=40>
    </p>";
    
-    if ($r[aktif]=='Y'){
+    if ($r['aktif']=='Y'){
       echo "<tr><td>Aktifkan di Homepage</td> <td> 
 	  :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type=radio name='aktif' value='Y' checked>Ya  
       <input type=radio name='aktif' value='N'>Tidak</td></tr>";}
@@ -235,11 +235,11 @@ echo "</tbody></table> ";
 	  echo " <br/><br/><div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=kategori'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=kategori'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 	  

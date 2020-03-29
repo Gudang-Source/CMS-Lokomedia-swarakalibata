@@ -1,6 +1,6 @@
 <?php
   include "config/koneksi.php";
   include "rss.php";
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
+  $iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
   header("location: $iden[url]"); 
 ?>

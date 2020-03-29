@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 </script>
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 //Deteksi hanya bisa diinclude, tidak bisa langsung dibuka (direct open)
 if(count(get_included_files())==1)
 {
@@ -42,7 +44,7 @@ if(count(get_included_files())==1)
 }
 else{
 $aksi="modul/mod_halamanstatis/aksi_halamanstatis.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
 //update/////////////////////////////////////
 
@@ -53,7 +55,7 @@ echo "<div id=main-content>
       <div class=grid_12> 
       <br/>
 	  <a href='?module=halamanstatis&act=tambahhalamanstatis' class='button'>
-	  <span>Tambah Halaman Baru<img src='images/plus-small.gif' width='12' height='9'/></span>
+	  <span>Tambah Halaman Baru</span>
       </a></div>";
 
     if (empty($_GET['kata'])){
@@ -80,18 +82,18 @@ echo "<div class=grid_12>
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM halamanstatis ORDER BY id_halaman DESC LIMIT $posisi,$batas");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM halamanstatis ORDER BY id_halaman DESC LIMIT $posisi,$batas");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM halamanstatis 
+      $tampil=mysqli_query($conn,"SELECT * FROM halamanstatis 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_halaman DESC LIMIT $posisi,$batas");
     }
   
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
-    $tgl_posting=tgl_indo($r[tgl_posting]);
+    while($r=mysqli_fetch_array($tampil)){
+    $tgl_posting=tgl_indo($r['tgl_posting']);
 
     $lebar=strlen($no);
     switch($lebar){
@@ -118,10 +120,10 @@ echo "<div class=grid_12>
    
   <a href=?module=halamanstatis&act=edithalamanstatis&id=$r[id_halaman] title='Edit' class='with-tip'>
   <center><img src='img/edit.png'></a>
-   
+   &nbsp;
   <a href=javascript:confirmdelete('$aksi?module=halamanstatis&act=hapus&id=$r[id_halaman]&namafile=$r[gambar]') 
   title='Hapus' class='with-tip'>
-  &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+  <img src='img/hapus.png'></center></a> 
 	   
   </td></tr>";
   
@@ -129,11 +131,11 @@ echo "<div class=grid_12>
       }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM halamanstatis"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM halamanstatis"));
       }
         else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM halamanstatis WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM halamanstatis WHERE username='$_SESSION[namauser]'"));
       }  
       break;    
       }
@@ -150,18 +152,18 @@ echo "<table id=table-example class=table>
       </thead>
 	  <tbody> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM halamanstatis WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_halaman DESC LIMIT $posisi,$batas");
+      if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM halamanstatis WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_halaman DESC LIMIT $posisi,$batas");
       }
       else{
-      $tampil=mysql_query("SELECT * FROM halamanstatis 
+      $tampil=mysqli_query($conn,"SELECT * FROM halamanstatis 
                            WHERE username='$_SESSION[namauser]'
                            AND judul LIKE '%$_GET[kata]%'       
                            ORDER BY id_halaman DESC LIMIT $posisi,$batas");
       }
   
       $no = $posisi+1;
-      while($r=mysql_fetch_array($tampil)){
+      while($r=mysqli_fetch_array($tampil)){
 echo "<tr class=gradeX> 
       <td>$no</td> 
       <td>$r[judul]</td> 
@@ -172,10 +174,9 @@ echo "<tr class=gradeX>
    
   <a href=?module=halamanstatis&act=edithalamanstatis&id=$r[id_halaman] title='Edit' class='with-tip'>
   <center><img src='img/edit.png'></a>
-   
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <a href=javascript:confirmdelete('$aksi?module=halamanstatis&act=hapus&id=$r[id_halaman]&namafile=$r[gambar]') 
-  title='Hapus' class='with-tip'>
-  &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+  title='Hapus' class='with-tip'> <img src='img/hapus.png'></center></a> 
 	   
   </td></tr>";
   
@@ -183,11 +184,11 @@ echo "<tr class=gradeX>
      }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM halamanstatis WHERE judul LIKE '%$_GET[kata]%'"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM halamanstatis WHERE judul LIKE '%$_GET[kata]%'"));
       }
       else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM halamanstatis WHERE username='$_SESSION[namauser]' AND judul LIKE '%$_GET[kata]%'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM halamanstatis WHERE username='$_SESSION[namauser]' AND judul LIKE '%$_GET[kata]%'"));
       }  
       break;    
       }
@@ -229,18 +230,18 @@ echo "</tbody></table> ";
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=halamanstatis'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=halamanstatis'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
 	  
    break;
     
    case "edithalamanstatis":
-   $edit = mysql_query("SELECT * FROM halamanstatis WHERE id_halaman='$_GET[id]' AND username='$_SESSION[namauser]'");
-    $r    = mysql_fetch_array($edit);
+   $edit = mysqli_query($conn,"SELECT * FROM halamanstatis WHERE id_halaman='$_GET[id]' AND username='$_SESSION[namauser]'");
+    $r    = mysqli_fetch_array($edit);
    
    echo "
    <div id='main-content'>
@@ -270,7 +271,7 @@ echo "</tbody></table> ";
 	
 	<p class=inline-small-label> 
 	<span class=label>Gambar</span>";
-    if ($r[gambar]!=''){
+    if ($r['gambar']!=''){
     echo "&nbsp;&nbsp;&nbsp;&nbsp;<img src='../foto_statis/$r[gambar]' width=200><br/><br/>"; }
 
 	echo "</p>
@@ -283,11 +284,11 @@ echo "</tbody></table> ";
   echo "<div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=halamanstatis'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=halamanstatis'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </form>";
 	  
 	  

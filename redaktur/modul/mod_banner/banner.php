@@ -9,7 +9,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -18,11 +20,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_banner/aksi_banner.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Banner
   default:
     echo "<header><h3>SUPPORT</h3></header>
@@ -30,9 +32,9 @@ switch($_GET[act]){
             <div class='module_content'>
           <table id='rounded-corner'>
           <tr><th>No</th><th>Judul</th><th>URL</th><th>Tgl. Posting</th><th>Aksi</th></tr>";
-    $tampil=mysql_query("SELECT * FROM banner ORDER BY id_banner DESC");
+    $tampil=mysqli_query($conn,"SELECT * FROM banner ORDER BY id_banner DESC");
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
       $tgl=tgl_indo($r[tgl_posting]);
       echo "<tr><td>$no</td>
                 <td>$r[judul]</td>
@@ -63,8 +65,8 @@ switch($_GET[act]){
      break;
     
   case "editbanner":
-    $edit = mysql_query("SELECT * FROM banner WHERE id_banner='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM banner WHERE id_banner='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
     echo "<header><h3>EDIT SUPPORT</h3></header>
           <form method=POST enctype='multipart/form-data' action=$aksi?module=banner&act=update>

@@ -7,7 +7,9 @@ function confirmdelete(delUrl) {
 </script>
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
  
   echo "
@@ -34,23 +36,24 @@ session_start();
   
   else{
 	function GetCheckboxes($table, $key, $Label, $Nilai='') {
-  $s = "select * from $table order by nama_tag";
-  $r = mysql_query($s);
-  $_arrNilai = explode(',', $Nilai);
-  $str = '';
-  while ($w = mysql_fetch_array($r)) {
-    $_ck = (array_search($w[$key], $_arrNilai) === false)? '' : 'checked';
-    $str .= "<input type=checkbox name='".$key."[]' value='$w[$key]' $_ck>$w[$Label] ";
+    global $conn;
+    $s = "select * from $table order by nama_tag";
+    $r = mysqli_query($conn,$s);
+    $_arrNilai = explode(',', $Nilai);
+    $str = '';
+    while ($w = mysqli_fetch_array($r)) {
+      $_ck = (array_search($w[$key], $_arrNilai) === false)? '' : 'checked';
+      $str .= "<input type=checkbox name='".$key."[]' value='$w[$key]' $_ck>$w[$Label] ";
+    }
+    return $str;
   }
-  return $str;
-}
-	
+  	
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_video/aksi_video.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
   // Tampil Video
   default:
@@ -89,15 +92,15 @@ switch($_GET[act]){
     $p      = new Paging;
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
-	if ($_SESSION[leveluser]=='admin'){
-	$tampil = mysql_query("SELECT * FROM video,playlist WHERE video.id_playlist=playlist.id_playlist ORDER BY id_video DESC");}
+	if ($_SESSION['leveluser']=='admin'){
+	$tampil = mysqli_query($conn,"SELECT * FROM video,playlist WHERE video.id_playlist=playlist.id_playlist ORDER BY id_video DESC");}
 	else{
-    $tampil = mysql_query("SELECT * FROM video,playlist WHERE (video.id_playlist=playlist.id_playlist) 
+    $tampil = mysqli_query($conn,"SELECT * FROM video,playlist WHERE (video.id_playlist=playlist.id_playlist) 
 	AND (username='$_SESSION[namauser]')  ORDER BY id_video DESC");}
   
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
-    $tgl_posting=tgl_indo($r[tanggal]);
+    while($r=mysqli_fetch_array($tampil)){
+    $tgl_posting=tgl_indo($r['tanggal']);
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -122,10 +125,10 @@ switch($_GET[act]){
    <td width=80>
    <a href=?module=video&act=editvideo&id=$r[id_video] title='Edit' class='with-tip'>
    <center><img src='img/edit.png'></a>
-   
+   &nbsp;&nbsp;&nbsp;&nbsp;
    <a href=javascript:confirmdelete('$aksi?module=video&act=hapus&id=$r[id_video]&namafile=$r[gbr_video]') 
    title='Hapus' class='with-tip'>
-   &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+   <img src='img/hapus.png'></center></a> 
 	   
    </td></tr>";
 				
@@ -133,15 +136,15 @@ switch($_GET[act]){
       $no++;
     }
     echo "</table>";
-	if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM video"));
+	if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM video"));
     }
 	else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM video WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM video WHERE username='$_SESSION[namauser]'"));
     }  
     
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
-    $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
+    $linkHalaman = $p->navHalaman($_GET['halaman'], $jmlhalaman);
  
     break;
 	
@@ -171,8 +174,8 @@ switch($_GET[act]){
    <label for=field4>Playlist</label>
    <select name='playlist'>
    <option value=0 selected>- Pilih Playlist -</option>";
-   $tampil=mysql_query("SELECT * FROM playlist ORDER BY jdl_playlist");
-   while($r=mysql_fetch_array($tampil)){
+   $tampil=mysqli_query($conn,"SELECT * FROM playlist ORDER BY jdl_playlist");
+   while($r=mysqli_fetch_array($tampil)){
    echo "<option value=$r[id_playlist]>$r[jdl_playlist]</option></p>";}
 			
    echo "</select>
@@ -202,9 +205,9 @@ switch($_GET[act]){
 		  
 
 	  
-   $tagvid = mysql_query("SELECT * FROM tagvid ORDER BY tag_seo");
+   $tagvid = mysqli_query($conn,"SELECT * FROM tagvid ORDER BY tag_seo");
    echo "<tr><td valign=top>Tag (Label):&nbsp;&nbsp;&nbsp;&nbsp;</td><td> ";
-   while ($t=mysql_fetch_array($tagvid)){
+   while ($t=mysqli_fetch_array($tagvid)){
    echo "<input type=checkbox value='$t[tag_seo]' name=tag_seo[]>$t[nama_tag] ";}
    
 	  
@@ -212,11 +215,11 @@ switch($_GET[act]){
    echo " <br/><br/><div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=video'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=video'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
   </form>";
 		  
@@ -224,8 +227,8 @@ switch($_GET[act]){
   break;
     
     case "editvideo":
-    $edit = mysql_query("SELECT * FROM video WHERE id_video='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM video WHERE id_video='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 	
   
   
@@ -253,12 +256,12 @@ switch($_GET[act]){
    <label for=field4>Playlist</label>
    
    <select name='playlist'>";
-   $tampil=mysql_query("SELECT * FROM playlist ORDER BY jdl_playlist");
-   if ($r[id_playlist]==0){
+   $tampil=mysqli_query($conn,"SELECT * FROM playlist ORDER BY jdl_playlist");
+   if ($r['id_playlist']==0){
    echo "<option value=0 selected>- Pilih Playlist -</option>"; }   
-   while($w=mysql_fetch_array($tampil)){
+   while($w=mysqli_fetch_array($tampil)){
    
-   if ($r[id_playlist]==$w[id_playlist]){
+   if ($r['id_playlist']==$w['id_playlist']){
    echo "<option value=$w[id_playlist] selected>$w[jdl_playlist]</option>";}
    else{
    echo "<option value=$w[id_playlist]>$w[jdl_playlist]</option></p> ";} }
@@ -274,7 +277,7 @@ switch($_GET[act]){
 	 
     <p class=inline-small-label> 
     <label for=field4>Gambar</label> ";
-    if ($r[gbr_video]!=''){
+    if ($r['gbr_video']!=''){
     echo "<img src='../img_video/kecil_$r[gbr_video]'> </p>"; }
   	 
     echo "
@@ -309,7 +312,7 @@ switch($_GET[act]){
    <span class style=\"color:#EA1C1C;\">Tipe video harus MP4/FLV
     </p>";
 	
-    $d = GetCheckboxes('tagvid', 'tag_seo', 'nama_tag', $r[tagvid]);
+    $d = GetCheckboxes('tagvid', 'tag_seo', 'nama_tag', $r['tagvid']);
 	
 	 echo "
    <p class=inline-small-label> 
@@ -321,11 +324,11 @@ switch($_GET[act]){
       <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=video'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=video'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 		 

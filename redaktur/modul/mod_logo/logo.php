@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
    echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -25,11 +27,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_logo/aksi_logo.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil logo
   default:
       
@@ -57,10 +59,10 @@ switch($_GET[act]){
    
    
    
-    $tampil=mysql_query("SELECT * FROM logo ORDER BY id_logo DESC");
+    $tampil=mysqli_query($conn,"SELECT * FROM logo ORDER BY id_logo DESC");
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
-      $tgl=tgl_indo($r[tgl_posting]);
+    while ($r=mysqli_fetch_array($tampil)){
+      // $tgl=tgl_indo($r['tgl_posting']);
 	  
 	  
     echo "<tr class=gradeX> 
@@ -80,8 +82,8 @@ switch($_GET[act]){
   
 
   case "editlogo":
-    $edit = mysql_query("SELECT * FROM logo WHERE id_logo='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM logo WHERE id_logo='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 	
   echo "
    <div id='main-content'>
@@ -113,11 +115,11 @@ switch($_GET[act]){
    <ul class=actions-right> 
    
    <li>
-   <a class='button red' id=reset-validate-form href='?module=logo'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=logo'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
 
 		  

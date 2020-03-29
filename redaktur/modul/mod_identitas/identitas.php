@@ -1,11 +1,11 @@
  
   <?php
   $aksi="modul/mod_identitas/aksi_identitas.php";
-  switch($_GET[act]){
+  switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil identitas
   default:
-    $sql  = mysql_query("SELECT * FROM identitas LIMIT 1");
-    $r    = mysql_fetch_array($sql);
+    $sql  = mysqli_query($conn,"SELECT * FROM identitas LIMIT 1");
+    $r    = mysqli_fetch_array($sql);
 
   
    echo "
@@ -74,7 +74,7 @@
 	
 	<p class=inline-small-label> 
 	<span class=label>Gambar Favicon</span>";
-    if ($r[favicon]!=''){
+    if ($r['favicon']!=''){
     echo "&nbsp;&nbsp;&nbsp;&nbsp;<img src=../$r[favicon] width=30><br/><br/>"; 
 	
 
@@ -89,11 +89,11 @@
     echo "<div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=identitas'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=identitas'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </form>";
 	
     break;  

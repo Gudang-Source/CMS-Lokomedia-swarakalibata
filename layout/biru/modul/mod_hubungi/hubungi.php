@@ -15,7 +15,6 @@
   
   <form name='form' action='hubungi-aksi.html' method=POST onSubmit=\"return validasi(this)\">
   
-  <input type=hidden name=id value=$d[id_berita]>			   
   
   <h3 class='tag_title'>Nama</h3>
   <input type='text' class='tag_form' name='nama'/><br/><br/>
@@ -72,14 +71,14 @@
   <div class="list">
   <?php    
 
-  $sql=mysql_query("SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
+  $sql=mysqli_query($conn,"SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
   
-  while($p=mysql_fetch_array($sql)){
+  while($p=mysqli_fetch_array($sql)){
   
   echo "
   <div class='item'>
   <div class='image'>
-  <a href=berita-$t[judul_seo].html>
+  <a href=berita-$p[judul_seo].html>
   <img src='foto_berita/small_$p[gambar]' width=60 height=50 border=0></a>
   </div>";
   
@@ -98,8 +97,8 @@
    <div id="kernel_triple_recent_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $terkini=mysql_query("SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
-  while($t=mysql_fetch_array($terkini)){
+  $terkini=mysqli_query($conn,"SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
+  while($t=mysqli_fetch_array($terkini)){
   $tgl = tgl_indo($t['tanggal']);
   $isi_berita = strip_tags($t['isi_berita']); 
   $isi = substr($isi_berita,0,150); 
@@ -126,10 +125,10 @@
   <div id="kernel_triple_comments_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $komentar=mysql_query("SELECT * FROM berita,komentar 
+  $komentar=mysqli_query($conn,"SELECT * FROM berita,komentar 
   WHERE komentar.id_berita=berita.id_berita  
   ORDER BY id_komentar DESC LIMIT 6");
-  while($k=mysql_fetch_array($komentar)){
+  while($k=mysqli_fetch_array($komentar)){
   $isi_komentar = strip_tags($k['isi_komentar']); 
   $isi = substr($isi_komentar,0,100); 
   $isi = substr($isi_komentar,0,strrpos($isi," ")); 
@@ -157,9 +156,9 @@
   <div class="sidebar-title"><b>PARIWARA</b></div>
   <div class="photos">
   <?php
-  $pasangiklan=mysql_query("SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
+  $pasangiklan=mysqli_query($conn,"SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
 
-  while($b=mysql_fetch_array($pasangiklan)){
+  while($b=mysqli_fetch_array($pasangiklan)){
   echo "<a href='$b[url]' 'target='_blank' title='$b[judul]'>
   <img width=250 src='foto_pasangiklan/$b[gambar]' border=0></a>";}
   ?>

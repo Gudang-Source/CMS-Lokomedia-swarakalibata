@@ -1,13 +1,15 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 include "config/koneksi.php";
 include "config/library.php";
 
 $nama=trim($_POST['nama_komentar']);
 $komentar=trim($_POST['isi_komentar']);
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
+  $iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
   
-  $zali=mysql_fetch_array(mysql_query("SELECT * FROM berita,komentar 
+  $zali=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM berita,komentar 
   WHERE komentar.id_berita=berita.id_berita"));
   
 
@@ -26,7 +28,9 @@ elseif (strlen($_POST['isi_komentar']) > 1000) {
 }
 else{
 function antiinjection($data){
-  $filter_sql = mysql_real_escape_string(stripslashes(strip_tags(htmlspecialchars($data,ENT_QUOTES))));
+  global $conn;
+  $filter_sql = mysqli_real_escape_string($conn,$data);
+  $filter_sql = stripslashes(strip_tags(htmlspecialchars($filter_sql,ENT_QUOTES)));
   return $filter_sql;
 }
 
@@ -43,24 +47,24 @@ $split_count = count($split_text);
 $max = 57;
 
 for($i = 0; $i <= $split_count; $i++){
-if(strlen($split_text[$i]) >= $max){
-for($j = 0; $j <= strlen($split_text[$i]); $j++){
-$char[$j] = substr($split_text[$i],$j,1);
-if(($j % $max == 0) && ($j != 0)){
-  $v_text .= $char[$j] . ' ';
-}else{
-  $v_text .= $char[$j];
-}
-}
-}else{
-  $v_text .= " " . $split_text[$i] . " ";
-}
+  if(strlen($split_text[$i]) >= $max){
+    for($j = 0; $j <= strlen($split_text[$i]); $j++){
+      $char[$j] = substr($split_text[$i],$j,1);
+      if(($j % $max == 0) && ($j != 0)){
+        $v_text .= $char[$j] . ' ';
+      }else{
+        $v_text .= $char[$j];
+      }
+    }
+  }else{
+    $v_text .= " " . $split_text[$i] . " ";
+  }
 }
 
-    $sql = mysql_query("INSERT INTO komentar(nama_komentar,url,isi_komentar,id_berita,tgl,jam_komentar) 
+    $sql = mysqli_query($conn,"INSERT INTO komentar(nama_komentar,url,isi_komentar,id_berita,tgl,jam_komentar) 
                         VALUES('$nama_komentar','$url','$v_text','$_POST[id]','$tgl_sekarang','$jam_sekarang')");
 						
-$row=mysql_fetch_array(mysql_query("SELECT * FROM berita WHERE id_berita=$_POST[id]"));
+$row=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM berita WHERE id_berita=$_POST[id]"));
     echo "<meta http-equiv='refresh' content='0; url=berita-$row[judul_seo].html'>";
 	
    $kepada = "$iden[email]"; 

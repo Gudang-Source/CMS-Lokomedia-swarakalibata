@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
  
   echo "
@@ -36,15 +38,16 @@ session_start();
   else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 function GetCheckboxes($table, $key, $Label, $Nilai='') {
+  global $conn;
   $s = "select * from $table order by nama_tag";
-  $r = mysql_query($s);
+  $r = mysqli_query($conn,$s);
   $_arrNilai = explode(',', $Nilai);
   $str = '';
-  while ($w = mysql_fetch_array($r)) {
+  while ($w = mysqli_fetch_array($r)) {
     $_ck = (array_search($w[$key], $_arrNilai) === false)? '' : 'checked';
     $str .= "<input type=checkbox name='".$key."[]' value='$w[$key]' $_ck>$w[$Label] ";
   }
@@ -52,7 +55,7 @@ function GetCheckboxes($table, $key, $Label, $Nilai='') {
 }
 
 $aksi="modul/mod_berita/aksi_berita.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
   // Tampil Berita
   default:
@@ -92,20 +95,20 @@ switch($_GET[act]){
     $batas  = 40;
     $posisi = $p->cariPosisi($batas);
 
-    if ($_SESSION[leveluser]=='admin'){
-    $tampil = mysql_query("SELECT * FROM berita ORDER BY id_berita DESC");}
+    if ($_SESSION['leveluser']=='admin'){
+    $tampil = mysqli_query($conn,"SELECT * FROM berita ORDER BY id_berita DESC");}
 	  
 	  
     else{
-    $tampil=mysql_query("SELECT * FROM berita 
+    $tampil=mysqli_query($conn,"SELECT * FROM berita 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_berita DESC");}
 						   
   
     $no = $posisi+1;
     
-   while($r=mysql_fetch_array($tampil)){
-    $tgl_posting=tgl_indo($r[tanggal]);
+   while($r=mysqli_fetch_array($tampil)){
+    $tgl_posting=tgl_indo($r['tanggal']);
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -130,10 +133,10 @@ switch($_GET[act]){
    
    <a href=?module=berita&act=editberita&id=$r[id_berita] title='Edit' class='with-tip'>
    <center><img src='img/edit.png'></a>
-   
+   &nbsp;
    <a href=javascript:confirmdelete('$aksi?module=berita&act=hapus&id=$r[id_berita]&namafile=$r[gambar]') 
    title='Hapus' class='with-tip'>
-   &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+   <img src='img/hapus.png'></center></a> 
 	   
    </td></tr>";
 
@@ -142,14 +145,14 @@ switch($_GET[act]){
    
    echo "</table>";
 
-    if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM berita"));
+    if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM berita"));
     }
     else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM berita WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM berita WHERE username='$_SESSION[namauser]'"));
     }  
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
-    $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
+    $linkHalaman = $p->navHalaman($_GET['halaman'], $jmlhalaman);
 
     break;    
     }
@@ -162,18 +165,18 @@ switch($_GET[act]){
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM berita WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_berita DESC LIMIT $posisi,$batas");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM berita WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_berita DESC LIMIT $posisi,$batas");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM berita 
+      $tampil=mysqli_query($conn,"SELECT * FROM berita 
                            WHERE username='$_SESSION[namauser]'
                            AND judul LIKE '%$_GET[kata]%'       
                            ORDER BY id_berita DESC LIMIT $posisi,$batas");
     }
   
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
+    while($r=mysqli_fetch_array($tampil)){
       $tgl_posting=tgl_indo($r[tanggal]);
       echo "<tr><td>$no</td>
                 <td>$r[judul]</td>
@@ -185,11 +188,11 @@ switch($_GET[act]){
     }
     echo "</table>";
 
-    if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM berita WHERE judul LIKE '%$_GET[kata]%'"));
+    if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM berita WHERE judul LIKE '%$_GET[kata]%'"));
     }
     else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM berita WHERE username='$_SESSION[namauser]' AND judul LIKE '%$_GET[kata]%'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM berita WHERE username='$_SESSION[namauser]' AND judul LIKE '%$_GET[kata]%'"));
     }  
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
     $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
@@ -237,13 +240,13 @@ switch($_GET[act]){
    <label for=field4>Kategori</label>
    <select name='kategori'>
    <option value=0 selected>Pilih Kategori</option>";
-   $tampil=mysql_query("SELECT * FROM kategori WHERE aktif='Y' ORDER BY nama_kategori");
-   while($r=mysql_fetch_array($tampil)){
+   $tampil=mysqli_query($conn,"SELECT * FROM kategori WHERE aktif='Y' ORDER BY nama_kategori");
+   while($r=mysqli_fetch_array($tampil)){
    echo "<option value=$r[id_kategori]>$r[nama_kategori]</option></p>"; }
    
    echo "</select>";
 
-   if ($r[headline]=='Y'){
+   if ($r['headline']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Headline</label>
@@ -262,7 +265,7 @@ switch($_GET[act]){
    ///////////////////////////////////////////////////////////////////////
    
    									 
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Pilihan Redaksi</label>
@@ -281,7 +284,7 @@ switch($_GET[act]){
    //////////////////////////////////////////////////////////////////////
 										 
 
-   if ($r[utama]=='Y'){
+   if ($r['utama']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Berita Utama</label>
@@ -319,9 +322,9 @@ switch($_GET[act]){
    <input type=text name='keterangan_gambar'>
    </p><br /><br />";
 
-   $tag = mysql_query("SELECT * FROM tag ORDER BY tag_seo");
+   $tag = mysqli_query($conn,"SELECT * FROM tag ORDER BY tag_seo");
    echo "<tr><td valign=top><b>Tag (Label)</b> :&nbsp;&nbsp;&nbsp;&nbsp;</td><td> ";
-   while ($t=mysql_fetch_array($tag)){
+   while ($t=mysqli_fetch_array($tag)){
    echo "<input type=checkbox value='$t[tag_seo]' name=tag_seo[]>$t[nama_tag] ";}
    
     
@@ -329,11 +332,11 @@ switch($_GET[act]){
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=berita'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=berita'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
    
@@ -342,8 +345,8 @@ switch($_GET[act]){
     
     
   case "editberita":
-  $edit = mysql_query("SELECT * FROM berita WHERE id_berita='$_GET[id]'");
-  $r    = mysql_fetch_array($edit);
+  $edit = mysqli_query($conn,"SELECT * FROM berita WHERE id_berita='$_GET[id]'");
+  $r    = mysqli_fetch_array($edit);
 
 
    echo "
@@ -381,12 +384,12 @@ switch($_GET[act]){
    <p class=inline-small-label> 
    <label for=field4>Kategori</label>
    <select name='kategori'>";
-   $tampil=mysql_query("SELECT * FROM kategori ORDER BY nama_kategori");
-   if ($r[id_kategori]==0){
+   $tampil=mysqli_query($conn,"SELECT * FROM kategori ORDER BY nama_kategori");
+   if ($r['id_kategori']==0){
    echo "<option value=0 selected>- Pilih Kategori -</option>"; }   
 
-   while($w=mysql_fetch_array($tampil)){
-   if ($r[id_kategori]==$w[id_kategori]){
+   while($w=mysqli_fetch_array($tampil)){
+   if ($r['id_kategori']==$w['id_kategori']){
    echo "<option value=$w[id_kategori] selected>$w[nama_kategori]</option>";}
    else{
    echo "<option value=$w[id_kategori]>$w[nama_kategori]</option> </p> ";}}
@@ -394,7 +397,7 @@ switch($_GET[act]){
    echo "</select>";
 
 
-   if ($r[headline]=='Y'){
+   if ($r['headline']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Headline</label>
@@ -413,7 +416,7 @@ switch($_GET[act]){
    ///////////////////////////////////////////////////////////////////////
    
    									 
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Pilihan Redaksi</label>
@@ -432,7 +435,7 @@ switch($_GET[act]){
    //////////////////////////////////////////////////////////////////////
 										 
 
-   if ($r[utama]=='Y'){
+   if ($r['utama']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Berita Utama</label>
@@ -459,7 +462,7 @@ switch($_GET[act]){
 		  
    <p class=inline-small-label> 
    <label for=field4>Gambar</label> ";
-   if ($r[gambar]!=''){
+   if ($r['gambar']!=''){
    echo "<img src='../foto_berita/small_$r[gambar]'>
    </p>";} 	  
 
@@ -477,7 +480,7 @@ switch($_GET[act]){
    <input type=text name='keterangan_gambar'>
    </p>";
 
-   $d = GetCheckboxes('tag', 'tag_seo', 'nama_tag', $r[tag]);
+   $d = GetCheckboxes('tag', 'tag_seo', 'nama_tag', $r['tag']);
    
    echo "
    <p class=inline-small-label> 
@@ -488,11 +491,11 @@ switch($_GET[act]){
    echo  "<div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=berita'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=berita'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
    
     break;  

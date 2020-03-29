@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "
@@ -35,11 +37,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_galerifoto/aksi_galerifoto.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
   // AWAL TAMPIL //////////////////////////
    default:
@@ -74,15 +76,15 @@ switch($_GET[act]){
     <tbody>";
 	
     if ($_SESSION['leveluser']=='admin'){
-    $tampil = mysql_query("SELECT * FROM gallery,album WHERE gallery.id_album=album.id_album ORDER BY id_gallery DESC");}
+    $tampil = mysqli_query($conn,"SELECT * FROM gallery,album WHERE gallery.id_album=album.id_album ORDER BY id_gallery DESC");}
 	
     else{
     
     echo "<span class style=\"color:#FAFAFA;\">$_SESSION[namauser]</span>";
-    $tampil = mysql_query("SELECT * FROM gallery,album WHERE gallery.id_album=album.id_album AND  
+    $tampil = mysqli_query($conn,"SELECT * FROM gallery,album WHERE gallery.id_album=album.id_album AND  
 	gallery.username='$_SESSION[namauser]' ORDER BY id_gallery DESC");}
    
-   while($r=mysql_fetch_array($tampil)){
+   while($r=mysqli_fetch_array($tampil)){
  
    echo "
    <tr class=gradeX> 
@@ -94,10 +96,10 @@ switch($_GET[act]){
    
    <a href=?module=galerifoto&act=editgalerifoto&id=$r[id_gallery] title='Edit' class='with-tip'>
    <center><img src='img/edit.png'></a>
-   
+   &nbsp;
    <a href=javascript:confirmdelete('$aksi?module=galerifoto&act=hapus&id=$r[id_gallery]&namafile=$r[gbr_gallery]') 
    title='Hapus' class='with-tip'>
-   &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+   <img src='img/hapus.png'></center></a> 
 	   
    </td></tr>";
    }
@@ -134,8 +136,8 @@ switch($_GET[act]){
    <label for=field4>Album</label>
    <select name='album'>
    <option value=0 selected>- Pilih Album -</option>";
-   $tampil=mysql_query("SELECT * FROM album ORDER BY jdl_album");
-   while($r=mysql_fetch_array($tampil)){
+   $tampil=mysqli_query($conn,"SELECT * FROM album ORDER BY jdl_album");
+   while($r=mysqli_fetch_array($tampil)){
    echo "<option value=$r[id_album]>$r[jdl_album]</option>  </p> ";}
  
    echo "</select>
@@ -154,11 +156,11 @@ switch($_GET[act]){
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=galerifoto'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=galerifoto'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
   </form>";
    
@@ -168,8 +170,8 @@ switch($_GET[act]){
 	
     case "editgalerifoto":
 	
-    $edit = mysql_query("SELECT * FROM gallery WHERE id_gallery='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM gallery WHERE id_gallery='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
 
    echo "
@@ -196,10 +198,10 @@ switch($_GET[act]){
     <p class=inline-small-label> 
     <label for=field4>Album</label>
     <select name='album'>";
-    $tampil=mysql_query("SELECT * FROM album ORDER BY jdl_album");
+    $tampil=mysqli_query($conn,"SELECT * FROM album ORDER BY jdl_album");
     if ($r[id_album]==0){
     echo "<option value=0 selected>- Pilih Album -</option>";}   
-    while($w=mysql_fetch_array($tampil)){
+    while($w=mysqli_fetch_array($tampil)){
     if ($r[id_album]==$w[id_album]){
     echo "<option value=$w[id_album] selected>$w[jdl_album]</option>";}
     else{
@@ -215,7 +217,7 @@ switch($_GET[act]){
 		  
    <p class=inline-small-label> 
    <label for=field4>Foto</label> ";
-    if ($r[gbr_gallery]!=''){
+    if ($r['gbr_gallery']!=''){
     echo "<img src='../img_galeri/kecil_$r[gbr_gallery]'></p>";  }
 		  
    echo "
@@ -227,11 +229,11 @@ switch($_GET[act]){
       <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=galerifoto'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=galerifoto'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 	  

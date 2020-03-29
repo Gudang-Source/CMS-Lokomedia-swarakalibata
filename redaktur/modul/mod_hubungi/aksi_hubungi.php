@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "<link href='../../css/zalstyle.css' rel='stylesheet' type='text/css'>
@@ -20,12 +22,12 @@ if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 else{
 include "../../../config/koneksi.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus hubungi
 if ($module=='hubungi' AND $act=='hapus'){
-  mysql_query("DELETE FROM hubungi WHERE id_hubungi='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM hubungi WHERE id_hubungi='$_GET[id]'");
   header('location:../../media.php?module='.$module);
 }
 }

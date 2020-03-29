@@ -16,7 +16,12 @@
  include "config/option.php";
 
   // Memilih template yang aktif saat ini
-  $pilih_template=mysql_query("SELECT folder FROM templates WHERE aktif='Y'");
-  $f=mysql_fetch_array($pilih_template);
-  include "$f[folder]/template.php"; 
+  $pilih_template=mysqli_query($conn,"SELECT folder FROM templates WHERE aktif='Y'");
+  $f=mysqli_fetch_array($pilih_template);
+  if (file_exists("$f[folder]/template.php")){
+    include "$f[folder]/template.php"; 
+  }else{
+    echo "Cek Nama / Folder Template";exit;
+  }
+  
 ?>

@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -10,12 +12,12 @@ include "../../../config/koneksi.php";
 include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus download
 if ($module=='download' AND $act=='hapus'){
-  mysql_query("DELETE FROM download WHERE id_download='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM download WHERE id_download='$_GET[id]'");
   header('location:../../media.php?module='.$module);
 }
 
@@ -27,7 +29,7 @@ elseif ($module=='download' AND $act=='input'){
   // Apabila ada gambar yang diupload
   if (!empty($lokasi_file)){
     UploadFile($nama_file);
-    mysql_query("INSERT INTO download(judul,
+    mysqli_query($conn,"INSERT INTO download(judul,
                                     nama_file,
                                     tgl_posting) 
                             VALUES('$_POST[judul]',
@@ -35,7 +37,7 @@ elseif ($module=='download' AND $act=='input'){
                                    '$tgl_sekarang')");
   }
   else{
-    mysql_query("INSERT INTO download(judul,
+    mysqli_query($conn,"INSERT INTO download(judul,
                                     tgl_posting) 
                             VALUES('$_POST[judul]',
                                    '$tgl_sekarang')");
@@ -50,12 +52,12 @@ elseif ($module=='download' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-    mysql_query("UPDATE download SET judul     = '$_POST[judul]'
+    mysqli_query($conn,"UPDATE download SET judul     = '$_POST[judul]'
                              WHERE id_download = '$_POST[id]'");
   }
   else{
     UploadFile($nama_file);
-    mysql_query("UPDATE download SET judul     = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE download SET judul     = '$_POST[judul]',
                                    nama_file    = '$nama_file'   
                              WHERE id_download = '$_POST[id]'");
   }

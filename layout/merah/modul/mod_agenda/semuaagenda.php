@@ -13,16 +13,16 @@
   $batas  = 2;
   $posisi = $p->cariPosisi($batas); 
   
-  $sql = mysql_query("SELECT * FROM agenda  ORDER BY dibaca DESC LIMIT $posisi,$batas");		 
-  while($d=mysql_fetch_array($sql)){
-  $tgl_posting = tgl_indo($d[tgl_posting]);
-  $tgl_mulai   = tgl_indo($d[tgl_mulai]);
-  $tgl_selesai = tgl_indo($d[tgl_selesai]);
-  $isi_agenda  = nl2br($d[isi_agenda]);
+  $sql = mysqli_query($conn,"SELECT * FROM agenda  ORDER BY dibaca DESC LIMIT $posisi,$batas");		 
+  while($d=mysqli_fetch_array($sql)){
+  $tgl_posting = tgl_indo($d['tgl_posting']);
+  $tgl_mulai   = tgl_indo($d['tgl_mulai']);
+  $tgl_selesai = tgl_indo($d['tgl_selesai']);
+  $isi_agenda  = nl2br($d['isi_agenda']);
 	
- $baca = $d[dibaca]+1;
-  
-  mysql_query("UPDATE agenda  SET dibaca='$baca' WHERE tema_seo='$_GET[tema]'");
+  $baca = $d['dibaca']+1;
+  $tema = isset($_GET['tema']) ? $_GET['tema']:'';
+  mysqli_query($conn,"UPDATE agenda  SET dibaca='$baca' WHERE tema_seo='$tema'");
 	
 	
   echo"<div class='post post-style-1'>
@@ -55,9 +55,9 @@
   echo "</div><div class='item'>";
   echo "</div><br/>";}
 	
-  $jmldata     = mysql_num_rows(mysql_query("SELECT * FROM agenda"));
+  $jmldata     = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM agenda"));
   $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
-  $linkHalaman = $p->navHalaman($_GET[halagenda], $jmlhalaman);
+  $linkHalaman = $p->navHalaman($_GET['halagenda'], $jmlhalaman);
 
   echo "<div class='pages'> $linkHalaman</div> ";
   echo "</div>";            
@@ -95,9 +95,9 @@
   <div class="list">
   <?php    
 
-  $sql=mysql_query("SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
+  $sql=mysqli_query($conn,"SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
   
-  while($p=mysql_fetch_array($sql)){
+  while($p=mysqli_fetch_array($sql)){
   
   echo "
   <div class='item'>
@@ -121,8 +121,8 @@
    <div id="kernel_triple_recent_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $terkini=mysql_query("SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
-  while($t=mysql_fetch_array($terkini)){
+  $terkini=mysqli_query($conn,"SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
+  while($t=mysqli_fetch_array($terkini)){
   $tgl = tgl_indo($t['tanggal']);
   $isi_berita = strip_tags($t['isi_berita']); 
   $isi = substr($isi_berita,0,150); 
@@ -149,10 +149,10 @@
   <div id="kernel_triple_comments_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $komentar=mysql_query("SELECT * FROM berita,komentar 
+  $komentar=mysqli_query($conn,"SELECT * FROM berita,komentar 
   WHERE komentar.id_berita=berita.id_berita  
   ORDER BY id_komentar DESC LIMIT 6");
-  while($k=mysql_fetch_array($komentar)){
+  while($k=mysqli_fetch_array($komentar)){
   $isi_komentar = strip_tags($k['isi_komentar']); 
   $isi = substr($isi_komentar,0,100); 
   $isi = substr($isi_komentar,0,strrpos($isi," ")); 
@@ -180,9 +180,9 @@
   <div class="sidebar-title"><b>PARIWARA</b></div>
   <div class="photos">
   <?php
-  $pasangiklan=mysql_query("SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
+  $pasangiklan=mysqli_query($conn,"SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
 
-  while($b=mysql_fetch_array($pasangiklan)){
+  while($b=mysqli_fetch_array($pasangiklan)){
   echo "<a href='$b[url]' 'target='_blank' title='$b[judul]'>
   <img width=250 src='foto_pasangiklan/$b[gambar]' border=0></a>";}
   ?>

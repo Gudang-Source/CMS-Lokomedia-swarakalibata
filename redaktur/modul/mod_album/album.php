@@ -10,7 +10,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "
@@ -37,11 +39,11 @@ session_start();
   else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_album/aksi_album.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
 //update/////////////////////////////////////
 
@@ -79,16 +81,16 @@ echo "
     <tbody>";
   
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM album ORDER BY id_album DESC");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM album ORDER BY id_album DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM album 
+      $tampil=mysqli_query($conn,"SELECT * FROM album 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_album DESC");
     }
   
-    while($r=mysql_fetch_array($tampil)){
+    while($r=mysqli_fetch_array($tampil)){
 	
   echo "<tr class=gradeX> 
    <td width=50><center><img src='../img_album/kecil_$r[gbr_album]' width=50></center></td>
@@ -104,11 +106,11 @@ echo "
       }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM album"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM album"));
       }
         else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM album WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM album WHERE username='$_SESSION[namauser]'"));
       }  
       break;    
       }
@@ -127,18 +129,18 @@ echo "
     </thead>
     <tbody>";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM album WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_album DESC");
+      if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM album WHERE judul LIKE '%$_GET[kata]%' ORDER BY id_album DESC");
       }
       else{
-      $tampil=mysql_query("SELECT * FROM album 
+      $tampil=mysqli_query($conn,"SELECT * FROM album 
                            WHERE username='$_SESSION[namauser]'
                            AND judul LIKE '%$_GET[kata]%'       
                            ORDER BY id_album DESC");
       }
   
       $no = $posisi+1;
-      while($r=mysql_fetch_array($tampil)){
+      while($r=mysqli_fetch_array($tampil)){
 	  
   echo "<tr class=gradeX> 
    <td width=50><center><img src='../img_album/kecil_$r[gbr_album]' width=50></center></td>
@@ -156,11 +158,11 @@ echo "
      }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM album WHERE jdl_album LIKE '%$_GET[kata]%'"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM album WHERE jdl_album LIKE '%$_GET[kata]%'"));
       }
       else{
-     $jmldata = mysql_num_rows(mysql_query("SELECT * FROM album WHERE username='$_SESSION[namauser]' AND jdl_album LIKE '%$_GET[kata]%'"));
+     $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM album WHERE username='$_SESSION[namauser]' AND jdl_album LIKE '%$_GET[kata]%'"));
       }  
       break;    
       }
@@ -202,11 +204,11 @@ echo "</tbody></table> ";
       <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=album'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=album'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 		  
@@ -214,8 +216,8 @@ echo "</tbody></table> ";
   
   // Form Edit Album  
   case "editalbum":
-    $edit = mysql_query("SELECT * FROM album WHERE id_album='$_GET[id]' AND username='$_SESSION[namauser]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM album WHERE id_album='$_GET[id]' AND username='$_SESSION[namauser]'");
+    $r    = mysqli_fetch_array($edit);
 
    echo "
    <div id='main-content'>
@@ -254,7 +256,7 @@ echo "</tbody></table> ";
   <input type=file name='fupload' size=40>
    </p> ";
 				  
-  if ($r[aktif]=='Y'){
+  if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Aktif</label>
@@ -274,11 +276,11 @@ echo "</tbody></table> ";
     echo "<div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=album'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=album'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 	  

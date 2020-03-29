@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
    echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -34,11 +36,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_modul/aksi_modul.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Modul
   default:
   
@@ -79,18 +81,18 @@ switch($_GET[act]){
   <tbody>";
 		  
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM modul ORDER BY urutan DESC");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM modul ORDER BY urutan DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM modul 
+      $tampil=mysqli_query($conn,"SELECT * FROM modul 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY urutan DESC");
     }
   
  
-  while ($r=mysql_fetch_array($tampil)){
-    $no=$r[urutan];
+  while ($r=mysqli_fetch_array($tampil)){
+    $no=$r['urutan'];
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -116,10 +118,10 @@ switch($_GET[act]){
    <td width=80>
    <a href=?module=modul&act=editmodul&id=$r[id_modul] title='Edit' class='with-tip'>
    <center><img src='img/edit.png'></a>
-   
+   &nbsp;
    <a href=javascript:confirmdelete('$aksi?module=modul&act=hapus&id=$r[id_modul]') 
    title='Hapus' class='with-tip'>
-   &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+   <img src='img/hapus.png'></center></a> 
 	   
    </td></tr>"; }
 	
@@ -175,11 +177,11 @@ switch($_GET[act]){
     <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=modul'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=modul'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";
 		  		  
@@ -187,8 +189,8 @@ switch($_GET[act]){
   break;
   case "editmodul":
   
-    $edit = mysql_query("SELECT * FROM modul WHERE id_modul='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM modul WHERE id_modul='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
    echo "
    <div id='main-content'>
@@ -216,7 +218,7 @@ switch($_GET[act]){
    </p>";
 		  
 										 
-   if ($r[publish]=='Y'){
+   if ($r['publish']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Publish</label>
@@ -233,7 +235,7 @@ switch($_GET[act]){
    </p>";}
 			
  									 
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Aktif</label>
@@ -251,7 +253,7 @@ switch($_GET[act]){
 				
 				
  									 
-   if ($r[status]=='user'){
+   if ($r['status']=='user'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Status</label>
@@ -277,11 +279,11 @@ switch($_GET[act]){
     <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=modul'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=modul'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";
    

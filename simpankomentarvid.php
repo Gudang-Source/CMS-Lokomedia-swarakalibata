@@ -1,12 +1,12 @@
 <?php
-error_reporting(0);
+// error_reporting(0);
 session_start();
 include "config/koneksi.php";
 include "config/library.php";
 
 $nama=trim($_POST['nama_komentar']);
 $komentar=trim($_POST['isi_komentar']);
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
+$iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
 
 if (empty($nama)){
   echo "Anda belum mengisikan NAMA<br />
@@ -22,7 +22,9 @@ elseif (strlen($_POST['isi_komentar']) > 1000) {
 }
 else{
 function antiinjection($data){
-  $filter_sql = mysql_real_escape_string(stripslashes(strip_tags(htmlspecialchars($data,ENT_QUOTES))));
+  global $conn;
+  $filter_sql = mysqli_real_escape_string($conn,$data);
+  $filter_sql = stripslashes(strip_tags(htmlspecialchars($filter_sql,ENT_QUOTES)));
   return $filter_sql;
 }
 
@@ -53,7 +55,7 @@ if(($j % $max == 0) && ($j != 0)){
 }
 }
 
-    $sql = mysql_query("INSERT INTO komentarvid(nama_komentar,url,isi_komentar,id_video,tgl,jam_komentar) 
+    $sql = mysqli_query($conn,"INSERT INTO komentarvid(nama_komentar,url,isi_komentar,id_video,tgl,jam_komentar) 
                         VALUES('$nama_komentar','$url','$v_text','$_POST[id]','$tgl_sekarang','$jam_sekarang')");
 
     echo "<meta http-equiv='refresh' content='0; url=play-$_POST[id]-$_POST[judul].html'>";

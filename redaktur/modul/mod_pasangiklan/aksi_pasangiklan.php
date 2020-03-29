@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -12,19 +14,19 @@ include "../../../config/fungsi_seo.php";
 include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus pasangiklan
 if ($module=='pasangiklan' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gambar FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gambar FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'"));
   if ($data['gambar']!=''){
-  mysql_query("DELETE FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'");
      unlink("../../../foto_pasangiklan/$_GET[namafile]");   
      unlink("../../../foto_pasangiklan/small_$_GET[namafile]");   
   }
   else{
-  mysql_query("DELETE FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'");  
+  mysqli_query($conn,"DELETE FROM pasangiklan WHERE id_pasangiklan='$_GET[id]'");  
   }
   header('location:../../media.php?module='.$module);
 }
@@ -37,8 +39,8 @@ elseif ($module=='pasangiklan' AND $act=='input'){
   $acak           = rand(000000,999999);
   $nama_file_unik = $acak.$nama_file; 
 
-  $mulai=$_POST[thn_mulai].'-'.$_POST[bln_mulai].'-'.$_POST[tgl_mulai];
-  $selesai=$_POST[thn_selesai].'-'.$_POST[bln_selesai].'-'.$_POST[tgl_selesai];
+  $mulai=$_POST['thn_mulai'].'-'.$_POST['bln_mulai'].'-'.$_POST['tgl_mulai'];
+  $selesai=$_POST['thn_selesai'].'-'.$_POST['bln_selesai'].'-'.$_POST['tgl_selesai'];
   
 
   // Apabila ada gambar yang diupload
@@ -49,7 +51,7 @@ elseif ($module=='pasangiklan' AND $act=='input'){
     }
     else{
     Uploadpasangiklan($nama_file_unik);
-   mysql_query("INSERT INTO pasangiklan(judul,
+   mysqli_query($conn,"INSERT INTO pasangiklan(judul,
                                       username,
                                     url,
                                     tgl_posting,
@@ -63,7 +65,7 @@ elseif ($module=='pasangiklan' AND $act=='input'){
   }
   }
   else{
-     mysql_query("INSERT INTO pasangiklan(judul,
+     mysqli_query($conn,"INSERT INTO pasangiklan(judul,
 	                                    username,
                                     tgl_posting,
                                     url) 
@@ -83,13 +85,13 @@ elseif ($module=='pasangiklan' AND $act=='update'){
   $acak           = rand(000000,999999);
   $nama_file_unik = $acak.$nama_file; 
 
-  $mulai=$_POST[thn_mulai].'-'.$_POST[bln_mulai].'-'.$_POST[tgl_mulai];
-  $selesai=$_POST[thn_selesai].'-'.$_POST[bln_selesai].'-'.$_POST[tgl_selesai];
+  $mulai=$_POST['thn_mulai'].'-'.$_POST['bln_mulai'].'-'.$_POST['tgl_mulai'];
+  $selesai=$_POST['thn_selesai'].'-'.$_POST['bln_selesai'].'-'.$_POST['tgl_selesai'];
 
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
- mysql_query("UPDATE pasangiklan SET judul     = '$_POST[judul]',
+ mysqli_query($conn,"UPDATE pasangiklan SET judul     = '$_POST[judul]',
                                    url       = '$_POST[url]'
                              WHERE id_pasangiklan = '$_POST[id]'");
   header('location:../../media.php?module='.$module);
@@ -101,13 +103,13 @@ elseif ($module=='pasangiklan' AND $act=='update'){
     }
     else{
 	
-	$data_gambar = mysql_query("SELECT gambar FROM pasangiklan WHERE id_pasangiklan='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);
+	$data_gambar = mysqli_query($conn,"SELECT gambar FROM pasangiklan WHERE id_pasangiklan='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);
 	@unlink('../../../foto_pasangiklan/'.$r['gambar']);
 	@unlink('../../../foto_pasangiklan/'.'small_'.$r['gambar']);
     Uploadpasangiklan($nama_file_unik,'../../../foto_pasangiklan/',300,120);
 	
-    mysql_query("UPDATE pasangiklan SET judul     = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE pasangiklan SET judul     = '$_POST[judul]',
                                    url       = '$_POST[url]',
                                    gambar    = '$nama_file_unik'   
                              WHERE id_pasangiklan = '$_POST[id]'");

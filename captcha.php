@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 header("Content-type: image/png");
 
 $captcha_image = imagecreatefrompng("captcha.png");

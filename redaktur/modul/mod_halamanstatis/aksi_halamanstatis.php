@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -11,19 +13,19 @@ include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 include "../../../config/fungsi_seo.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus halamanstatis
 if ($module=='halamanstatis' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gambar FROM halamanstatis WHERE id_halaman='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gambar FROM halamanstatis WHERE id_halaman='$_GET[id]'"));
   if ($data[gambar]!=''){
-     mysql_query("DELETE FROM halamanstatis WHERE id_halaman='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM halamanstatis WHERE id_halaman='$_GET[id]'");
      unlink("../../../foto_statis/$_GET[namafile]");   
      unlink("../../../foto_statis/small_$_GET[namafile]");   
   }
   else{
-     mysql_query("DELETE FROM halamanstatis WHERE id_halaman='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM halamanstatis WHERE id_halaman='$_GET[id]'");
   }
   header('location:../../media.php?module='.$module);
 }
@@ -43,7 +45,7 @@ elseif ($module=='halamanstatis' AND $act=='input'){
   if (!empty($lokasi_file)){
     UploadStatis($nama_file_unik);
 
-   mysql_query("INSERT INTO halamanstatis(judul,
+   mysqli_query($conn,"INSERT INTO halamanstatis(judul,
 	                                       judul_seo,
 										   isi_halaman,
 										   tgl_posting,
@@ -64,7 +66,7 @@ elseif ($module=='halamanstatis' AND $act=='input'){
   header('location:../../media.php?module='.$module);
   }
   else{
-   mysql_query("INSERT INTO halamanstatis(judul,
+   mysqli_query($conn,"INSERT INTO halamanstatis(judul,
 	                                       judul_seo,
 										   isi_halaman,
 										   tgl_posting,
@@ -95,19 +97,19 @@ elseif ($module=='halamanstatis' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-    mysql_query("UPDATE halamanstatis SET judul        = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE halamanstatis SET judul        = '$_POST[judul]',
                                         judul_seo    = '$judul_seo',
                                         isi_halaman  = '$_POST[isi_halaman]'  
                                   WHERE id_halaman   = '$_POST[id]'");
   header('location:../../media.php?module='.$module);
   }
   else{
-   $data_gambar = mysql_query("SELECT gambar FROM halamanstatis WHERE id_halaman='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);
+   $data_gambar = mysqli_query($conn,"SELECT gambar FROM halamanstatis WHERE id_halaman='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);
 	@unlink('../../../foto_statis/'.$r['gambar']);
 	@unlink('../../../foto_statis/'.'small_'.$r['gambar']);
     UploadStatis($nama_file_unik ,'../../../foto_statis/');
-    mysql_query("UPDATE halamanstatis SET judul        = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE halamanstatis SET judul        = '$_POST[judul]',
                                           judul_seo    = '$judul_seo',
                                           isi_halaman  = '$_POST[isi_halaman]',
                                           gambar       = '$nama_file_unik'   

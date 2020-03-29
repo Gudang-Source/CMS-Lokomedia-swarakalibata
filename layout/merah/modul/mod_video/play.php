@@ -5,11 +5,11 @@
 
   <?php
 
-  $detail=mysql_query("SELECT * FROM video,users,playlist WHERE users.username=video.username 
+  $detail=mysqli_query($conn,"SELECT * FROM video,users,playlist WHERE users.username=video.username 
   AND   video.id_playlist=playlist.id_playlist AND id_video='$_GET[id]'");
-  $d   = mysql_fetch_array($detail);
-  $tgl = tgl_indo($d[tanggal]);
-  $lihat = $d[dilihat]+1;
+  $d   = mysqli_fetch_array($detail);
+  $tgl = tgl_indo($d['tanggal']);
+  $lihat = $d['dilihat']+1;
 	
 
 	
@@ -43,9 +43,9 @@
   </div><br/>";
 	
 
-  $detail888=mysql_query("SELECT * FROM video WHERE id_video=$d[id_video]");
-  $d888   = mysql_fetch_array($detail888);
-  if($d888[video]==''){
+  $detail888=mysqli_query($conn,"SELECT * FROM video WHERE id_video=$d[id_video]");
+  $d888   = mysqli_fetch_array($detail888);
+  if($d888['video']==''){
   $teraskreasi="1";
   echo "<div id='video'>";
   echo "<iframe width='550' height='360' src='$d[youtube]' frameborder='0' allowfullscreen></iframe>";
@@ -63,20 +63,20 @@
 
   echo "$d[keterangan]<br/><br>";
 
-  $pisah_kata  = explode(",",$d[tagvid]);
+  $pisah_kata  = explode(",",$d['tagvid']);
   $jml_katakan = (integer)count($pisah_kata);
   $jml_kata = $jml_katakan-1; 
-  $ambil_id = substr($_GET[id],0,4);
+  $ambil_id = substr($_GET['id'],0,4);
 
   echo "";
   // Apabila video dilihat, maka tambahkan berapa kali dilihat
-  mysql_query("UPDATE video SET dilihat=$d[dilihat]+1 
+  mysqli_query($conn,"UPDATE video SET dilihat=$d[dilihat]+1 
               WHERE id_video='$_GET[id]'");
 			  
 			  
-  $komentar = mysql_query
-  ("select count(komentarvid.id_komentar) as jml from komentarvid WHERE id_video='$_GET[id]' AND aktif='Y'");
-  $k = mysql_fetch_array($komentar); 
+  $komentar = mysqli_query
+  ($conn,"select count(komentarvid.id_komentar) as jml from komentarvid WHERE id_video='$_GET[id]' AND aktif='Y'");
+  $k = mysqli_fetch_array($komentar); 
   echo "<br/><div class='post-title2'><class style=\"color:#EA1C1C;font-size:14px\"><h5>
   <b>Komentar : <class style=\"color:#EA1C1C;\">$k[jml]</b></h5></div>";
 
@@ -85,14 +85,14 @@
   $posisi = $p->cariPosisi($batas);
 
  
-  $sql = mysql_query("SELECT * FROM komentarvid WHERE id_video='$_GET[id]' AND aktif='Y' LIMIT $posisi,$batas");
-  $jml = mysql_num_rows($sql);
+  $sql = mysqli_query($conn,"SELECT * FROM komentarvid WHERE id_video='$_GET[id]' AND aktif='Y' LIMIT $posisi,$batas");
+  $jml = mysqli_num_rows($sql);
  
   if ($jml > 0){
-  while ($s = mysql_fetch_array($sql)){
-  $tanggal = tgl_indo($s[tgl]);
+  while ($s = mysqli_fetch_array($sql)){
+  $tanggal = tgl_indo($s['tgl']);
  
-  if ($s[url]!=''){
+  if ($s['url']!=''){
   echo "<div class='komen'>
   <h5><a name=$s[id_komentar] id=$s[id_komentar]>
   <a href='http://$s[url]' target='_blank'>$s[nama_komentar]</a></a></h5>";}
@@ -100,13 +100,13 @@
   echo "<div class='komen'><h5>$s[nama_komentar]</h5>";}
 
   echo "<span class='tanggal01'>$tanggal - $s[jam_komentar] WIB</span><div>";
-  $isian=nl2br($s[isi_komentar]); 
+  $isian=nl2br($s['isi_komentar']); 
   $isikan=sensor($isian); 
  
   echo autolink($isikan);
   echo "</div></div>";}
 
-  $jmldata     = mysql_num_rows(mysql_query("SELECT * FROM komentarvid WHERE id_video='$_GET[id]' AND aktif='Y'"));
+  $jmldata     = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM komentarvid WHERE id_video='$_GET[id]' AND aktif='Y'"));
   $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
   $linkHalaman = $p->navHalaman($_GET['halkomentarvideo'], $jmlhalaman);
 
@@ -172,14 +172,14 @@
   <div class="list">
   <?php    
 
-  $sql=mysql_query("SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
+  $sql=mysqli_query($conn,"SELECT * FROM berita ORDER BY dibaca DESC LIMIT 5"); 
   
-  while($p=mysql_fetch_array($sql)){
+  while($p=mysqli_fetch_array($sql)){
   
   echo "
   <div class='item'>
   <div class='image'>
-  <a href=berita-$t[judul_seo].html>
+  <a href=berita-$p[judul_seo].html>
   <img src='foto_berita/small_$p[gambar]' width=60 height=50 border=0></a>
   </div>";
   
@@ -198,8 +198,8 @@
    <div id="kernel_triple_recent_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $terkini=mysql_query("SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
-  while($t=mysql_fetch_array($terkini)){
+  $terkini=mysqli_query($conn,"SELECT * FROM berita ORDER BY id_berita DESC LIMIT 5");
+  while($t=mysqli_fetch_array($terkini)){
   $tgl = tgl_indo($t['tanggal']);
   $isi_berita = strip_tags($t['isi_berita']); 
   $isi = substr($isi_berita,0,150); 
@@ -226,10 +226,10 @@
   <div id="kernel_triple_comments_kernel_3" style="display: none;">
   <div class="list">
   <?php    
-  $komentar=mysql_query("SELECT * FROM berita,komentar 
+  $komentar=mysqli_query($conn,"SELECT * FROM berita,komentar 
   WHERE komentar.id_berita=berita.id_berita  
   ORDER BY id_komentar DESC LIMIT 6");
-  while($k=mysql_fetch_array($komentar)){
+  while($k=mysqli_fetch_array($komentar)){
   $isi_komentar = strip_tags($k['isi_komentar']); 
   $isi = substr($isi_komentar,0,100); 
   $isi = substr($isi_komentar,0,strrpos($isi," ")); 
@@ -265,10 +265,10 @@
 						
   
   <?php    
-  $agenda=mysql_query("SELECT * FROM agenda ORDER BY rand() DESC LIMIT 6");
-  while($a=mysql_fetch_array($agenda)){
-  $tgl_mulai = tgl_indo($a[tgl_mulai]);
-  $tgl_selesai = tgl_indo($a[tgl_selesai]);
+  $agenda=mysqli_query($conn,"SELECT * FROM agenda ORDER BY rand() DESC LIMIT 6");
+  while($a=mysqli_fetch_array($agenda)){
+  $tgl_mulai = tgl_indo($a['tgl_mulai']);
+  $tgl_selesai = tgl_indo($a['tgl_selesai']);
   $isi_agenda = strip_tags($a['isi_agenda']);
   $isi = substr($isi_agenda,0,120);
   $isi = substr($isi_agenda,0,strrpos($isi," ")); 
@@ -292,12 +292,12 @@
   <div class="sidebar-title"><b>JAJAK PENDAPAT</b></div>
   <div class="list">
   <?php
-  $tanya=mysql_query("SELECT * FROM poling WHERE aktif='Y' and status='Pertanyaan'");
-  $t=mysql_fetch_array($tanya);
+  $tanya=mysqli_query($conn,"SELECT * FROM poling WHERE aktif='Y' and status='Pertanyaan'");
+  $t=mysqli_fetch_array($tanya);
   echo " <div class='poling1'>$t[pilihan]</div>";
   echo "<form method=POST action='hasil-poling.html'>";
-  $poling=mysql_query("SELECT * FROM poling WHERE aktif='Y' and status='Jawaban'");
-  while ($p=mysql_fetch_array($poling)){
+  $poling=mysqli_query($conn,"SELECT * FROM poling WHERE aktif='Y' and status='Jawaban'");
+  while ($p=mysqli_fetch_array($poling)){
   echo "<input class=marginpoling type=radio name=pilihan value='$p[id_poling]'/>
   <class style=\"color:#666;font-size:12px;font-weight:700\">&nbsp;&nbsp;$p[pilihan]<br />";}
   echo "<input style='width: 50px; height: 20px;' type=submit class=simplebtn value=PILIH /></form>
@@ -317,7 +317,7 @@
   <div class="list">
 
   <?php
-    include_once("fungsi_kurs_bca.php");
+    include_once("$f[folder]/modul/fungsi_kurs_bca.php");
   ?> 
    </div></div></div>
   
@@ -329,7 +329,7 @@
   <div class="photo-gallery-widget">
   <div class="sidebar-title"><b>BERITA FOTO</b></div>
   <?php
-  $album= mysql_query("SELECT jdl_album, album.id_album, gbr_album, album_seo,  
+  $album= mysqli_query($conn,"SELECT jdl_album, album.id_album, gbr_album, album_seo,  
   COUNT(gallery.id_gallery) as jumlah 
   FROM album LEFT JOIN gallery 
   ON album.id_album=gallery.id_album 
@@ -338,8 +338,8 @@
   ORDER BY rand() DESC LIMIT 4");
   
   echo "<div class='photos2'>";              
-  while($w=mysql_fetch_array($album)){
-  $jdl_album=($w[jdl_album]);
+  while($w=mysqli_fetch_array($album)){
+  $jdl_album=($w['jdl_album']);
   
   echo "
   <a href=album-$w[id_album]-$w[album_seo].html>
@@ -358,9 +358,9 @@
   <div class="sidebar-title"><b>PARIWARA</b></div>
   <div class="photos">
   <?php
-  $pasangiklan=mysql_query("SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
+  $pasangiklan=mysqli_query($conn,"SELECT * FROM pasangiklan ORDER BY rand() LIMIT 2");
 
-  while($b=mysql_fetch_array($pasangiklan)){
+  while($b=mysqli_fetch_array($pasangiklan)){
   echo "<a href='$b[url]' 'target='_blank' title='$b[judul]'>
   <img width=250 src='foto_pasangiklan/$b[gambar]' border=0></a>";}
   ?>

@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -12,19 +14,19 @@ include "../../../config/fungsi_seo.php";
 include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus iklantengah
 if ($module=='iklantengah' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gambar FROM iklantengah WHERE id_iklantengah='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gambar FROM iklantengah WHERE id_iklantengah='$_GET[id]'"));
   if ($data['gambar']!=''){
-  mysql_query("DELETE FROM iklantengah WHERE id_iklantengah='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM iklantengah WHERE id_iklantengah='$_GET[id]'");
      unlink("../../../foto_iklantengah/$_GET[namafile]");   
      unlink("../../../foto_iklantengah/small_$_GET[namafile]");   
   }
   else{
-  mysql_query("DELETE FROM iklantengah WHERE id_iklantengah='$_GET[id]'");  
+  mysqli_query($conn,"DELETE FROM iklantengah WHERE id_iklantengah='$_GET[id]'");  
   }
   header('location:../../media.php?module='.$module);
 }
@@ -49,7 +51,7 @@ elseif ($module=='iklantengah' AND $act=='input'){
     }
     else{
     Uploadiklantengah($nama_file_unik);
-   mysql_query("INSERT INTO iklantengah(judul,
+   mysqli_query($conn,"INSERT INTO iklantengah(judul,
                                       username,
                                     url,
                                     tgl_posting,
@@ -63,7 +65,7 @@ elseif ($module=='iklantengah' AND $act=='input'){
   }
   }
   else{
-     mysql_query("INSERT INTO iklantengah(judul,
+     mysqli_query($conn,"INSERT INTO iklantengah(judul,
                                   	 username,
                                     tgl_posting,
                                     url) 
@@ -89,7 +91,7 @@ elseif ($module=='iklantengah' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
- mysql_query("UPDATE iklantengah SET judul     = '$_POST[judul]',
+ mysqli_query($conn,"UPDATE iklantengah SET judul     = '$_POST[judul]',
                                    url       = '$_POST[url]'
                              WHERE id_iklantengah = '$_POST[id]'");
   header('location:../../media.php?module='.$module);
@@ -101,13 +103,13 @@ elseif ($module=='iklantengah' AND $act=='update'){
     }
     else{
 	
-	$data_gambar = mysql_query("SELECT gambar FROM iklantengah WHERE id_iklantengah='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);
+	$data_gambar = mysqli_query($conn,"SELECT gambar FROM iklantengah WHERE id_iklantengah='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);
 	@unlink('../../../foto_iklantengah/'.$r['gambar']);
 	@unlink('../../../foto_iklantengah/'.'small_'.$r['gambar']);
     Uploadiklantengah($nama_file_unik,'../../../foto_iklantengah/',300,120);
 	
-    mysql_query("UPDATE iklantengah SET judul     = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE iklantengah SET judul     = '$_POST[judul]',
                                    url       = '$_POST[url]',
                                    gambar    = '$nama_file_unik'   
                              WHERE id_iklantengah = '$_POST[id]'");

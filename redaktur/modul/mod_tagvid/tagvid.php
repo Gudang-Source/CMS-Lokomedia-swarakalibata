@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 </script>
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
    echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -35,11 +37,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_tagvid/aksi_tagvid.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
   // Tampil Tag Video
   default:
@@ -77,17 +79,17 @@ switch($_GET[act]){
 		  
 		  
 	
-	if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM tagvid  ORDER BY id_tag DESC");
+	if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM tagvid  ORDER BY id_tag DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM tagvid 
+      $tampil=mysqli_query($conn,"SELECT * FROM tagvid 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_tag DESC");
     }
 	
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -110,9 +112,9 @@ switch($_GET[act]){
    
   <a href=?module=tagvid&act=edittag&id=$r[id_tag] title='Edit' class='with-tip'>
   <center><img src='img/edit.png'></a>
-   
+   &nbsp;
   <a href=javascript:confirmdelete('$aksi?module=tagvid&act=hapus&id=$r[id_tag]') title='Hapus' class='with-tip'>
-  &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+  <img src='img/hapus.png'></center></a> 
    
    </td></tr>";  
 
@@ -146,11 +148,11 @@ switch($_GET[act]){
       <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=tagvid'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=tagvid'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
      </li> </ul>
 	  </form>";		
 	  
@@ -159,8 +161,8 @@ switch($_GET[act]){
   
   // Form Edit Kategori  
   case "edittag":
-    $edit=mysql_query("SELECT * FROM tagvid WHERE id_tag='$_GET[id]'");
-    $r=mysql_fetch_array($edit);
+    $edit=mysqli_query($conn,"SELECT * FROM tagvid WHERE id_tag='$_GET[id]'");
+    $r=mysqli_fetch_array($edit);
 
    echo "
    <div id='main-content'>
@@ -186,11 +188,11 @@ switch($_GET[act]){
      <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=tagvid'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=tagvid'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
      </li> </ul>
 	  </form>";
 	  

@@ -1,16 +1,20 @@
 <?php
-session_start();
-error_reporting(0);
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
+// error_reporting(0);
 
 //fungsi cek akses user
 function user_akses($mod,$id){
+  global $conn;
 	$link = "?module=".$mod;
-	$cek = mysql_num_rows(mysql_query("SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul AND users_modul.id_session='$id' AND modul.link='$link'"));
+	$cek = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul AND users_modul.id_session='$id' AND modul.link='$link'"));
 	return $cek;
 }
 //fungsi cek akses menu
 function umenu_akses($link,$id){
-	$cek = mysql_num_rows(mysql_query("SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul AND users_modul.id_session='$id' AND modul.link='$link'"));
+  global $conn;
+	$cek = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul AND users_modul.id_session='$id' AND modul.link='$link'"));
 	return $cek;
 }
 //fungsi redirect
@@ -187,7 +191,7 @@ tinyMCE.init({
   <h3><?php include "nama.php"; ?></h3>
   
   <?php
-  $jumHub=mysql_num_rows(mysql_query("SELECT * FROM hubungi WHERE dibaca='N'"));
+  $jumHub=mysqli_num_rows(mysqli_query($conn,"SELECT * FROM hubungi WHERE dibaca='N'"));
   echo "
   <span class=messages> <a href='?module=hubungi'>
   <img src='img/icons/packs/fugue/16x16/mail.png' alt='Pesan'>  <span class style=\"color:#66CCFF;\"><b>$jumHub</b></span>

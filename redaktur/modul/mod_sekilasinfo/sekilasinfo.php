@@ -14,11 +14,11 @@ function confirmdelete(delUrl) {
 <?php
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_sekilasinfo/aksi_sekilasinfo.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Sekilas Info
   default:
     echo "<header><h3>SEKILAS INFO</h3></header>
@@ -26,9 +26,9 @@ switch($_GET[act]){
          <div class='module_content'>
           <table id='rounded-corner'>
           <tr><th>No</th><th>Info</th><th>Posting</th><th>Aksi</th></tr>";
-    $tampil=mysql_query("SELECT * FROM sekilasinfo ORDER BY id_sekilas DESC");
+    $tampil=mysqli_query($conn,"SELECT * FROM sekilasinfo ORDER BY id_sekilas DESC");
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
       $tgl=tgl_indo($r[tgl_posting]);
       echo "<tr><td>$no</td>
                 <td>$r[info]</td>
@@ -59,8 +59,8 @@ switch($_GET[act]){
      break;
     
   case "editsekilasinfo":
-    $edit = mysql_query("SELECT * FROM sekilasinfo WHERE id_sekilas='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM sekilasinfo WHERE id_sekilas='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
     echo "<header><h3>EDIT SEKILAS INFO</h3></header>
           <form method=POST enctype='multipart/form-data' action=$aksi?module=sekilasinfo&act=update>

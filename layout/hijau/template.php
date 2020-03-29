@@ -1,5 +1,5 @@
   <?php 
-  error_reporting(0);
+  // error_reporting(0);
   ?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml">
@@ -237,7 +237,7 @@
   
   <!--========= BACKGROUND================================-->
   <?php
-  $r=mysql_fetch_array(mysql_query("SELECT * FROM background"));
+  $r=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM background"));
   echo "<body style='background: url(img_background/$r[gambar]) top center repeat-y;'>";
   ?>
   <!--========= AKHIR BACKGROUND================================-->
@@ -254,9 +254,9 @@
 	
   <!---------------------------- LOGO ---------------------------------->			
   <div class="logo"><?php
-  $logo=mysql_query("SELECT * FROM logo ORDER BY id_logo DESC LIMIT 1");
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
-  while($b=mysql_fetch_array($logo)){
+  $logo=mysqli_query($conn,"SELECT * FROM logo ORDER BY id_logo DESC LIMIT 1");
+  $iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
+  while($b=mysqli_fetch_array($logo)){
   echo "<a href='$iden[url]'><img height=59 src='logo/$b[gambar]'/></a>";}
   ?></div>
   <!------------------------- AKHIR LOGO --------------------------------->	
@@ -264,8 +264,8 @@
  <!------------------------- SEARCH --------------------------------->	 				
   <div class="iklanatas">
   <?php
-  $iklantengah=mysql_query("SELECT * FROM iklantengah  WHERE id_iklantengah ='31' ORDER BY id_iklantengah DESC LIMIT 1");
-  while($b=mysql_fetch_array($iklantengah)){
+  $iklantengah=mysqli_query($conn,"SELECT * FROM iklantengah  WHERE id_iklantengah ='31' ORDER BY id_iklantengah DESC LIMIT 1");
+  while($b=mysqli_fetch_array($iklantengah)){
   echo "<div class='iklantengah'>
   <a href='$b[url]' title='$b[judul]'>
   <img src='foto_iklantengah/$b[gambar]' border=0 width=450 height=70></a>
@@ -286,12 +286,14 @@
   function get_menu($data, $parent = 0) {
   static $i = 1;
   $tab = str_repeat(" ", $i);
+  $data[$parent] = isset($data[$parent]) ? $data[$parent]:'';
   if ($data[$parent]) {
   $html = "$tab<li>";
   $i++;
   foreach ($data[$parent] as $v) {
   $child = get_menu($data, $v->id_menu);
   $html .= "$tab<li class='last'>";
+  $css = isset($css) ? $css:'';
   $html .= '<a class="'.$css.'" href="'.$v->link.'">'.$v->nama_menu.'</a>';
   if ($child) {
   $i--;
@@ -303,8 +305,8 @@
   else {
   return false;}}
   
-  $result = mysql_query("SELECT * FROM menu WHERE aktif='Ya' ORDER BY id_menu");
-  while ($row = mysql_fetch_object($result)) {
+  $result = mysqli_query($conn,"SELECT * FROM menu WHERE aktif='Ya' ORDER BY id_menu");
+  while ($row = mysqli_fetch_object($result)) {
   $data[$row->id_parent][] = $row; }
   $menu = get_menu($data);
   echo "$menu";
@@ -318,9 +320,9 @@
   <div class="breaking-wrapper">  
   <p><b>NEWS UPDATE</b></p><div class='horizontal-scroller'><div id='scrollingtext'>
   <?php
-  $terkini=mysql_query("SELECT * FROM berita ORDER BY id_berita  DESC LIMIT 10");
-  while($p=mysql_fetch_array($terkini)){
-  $baca = $p[dibaca]+1;
+  $terkini=mysqli_query($conn,"SELECT * FROM berita ORDER BY id_berita  DESC LIMIT 10");
+  while($p=mysqli_fetch_array($terkini)){
+  $baca = $p['dibaca']+1;
   $isi_berita = strip_tags($p['isi_berita']); 
   $isi = substr($isi_berita,0,100); 
   $isi = substr($isi_berita,0,strrpos($isi," ")); 
@@ -349,9 +351,9 @@
   <div class="mascot-euro">
   <div class="mascot">
  <?php
-  $logo=mysql_query("SELECT * FROM logo ORDER BY id_logo DESC LIMIT 1");
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
-  while($b=mysql_fetch_array($logo)){
+  $logo=mysqli_query($conn,"SELECT * FROM logo ORDER BY id_logo DESC LIMIT 1");
+  $iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
+  while($b=mysqli_fetch_array($logo)){
   echo "<a href='$iden[url]'><img height=24 width=120 src='logo/$b[gambar]'/></a>";}
   ?>
   </div>
@@ -384,22 +386,22 @@
   $waktu   = time(); // 
 
   // Mencek berdasarkan IPnya, apakah user sudah pernah mengakses hari ini 
-  $s = mysql_query("SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
+  $s = mysqli_query($conn,"SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
   // Kalau belum ada, simpan data user tersebut ke database
-  if(mysql_num_rows($s) == 0){
-    mysql_query("INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
+  if(mysqli_num_rows($s) == 0){
+    mysqli_query($conn,"INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
   } 
   else{
-    mysql_query("UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
+    mysqli_query($conn,"UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
   }
 
-  $pengunjung       = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
-  $totalpengunjung  = mysql_result(mysql_query("SELECT COUNT(hits) FROM statistik"), 0); 
-  $hits             = mysql_fetch_assoc(mysql_query("SELECT SUM(hits) as hitstoday FROM statistik WHERE tanggal='$tanggal' GROUP BY tanggal")); 
-  $totalhits        = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
-  $tothitsgbr       = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
+  $pengunjung       = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
+  $totalpengunjung  = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(hits) as hits FROM statistik"))['hits']; 
+  $hits             = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hitstoday FROM statistik WHERE tanggal='$tanggal' GROUP BY tanggal")); 
+  $totalhits        = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hits FROM statistik"))['hits']; 
+  $tothitsgbr       = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hits FROM statistik"))['hits']; 
   $bataswaktu       = time() - 300;
-  $pengunjungonline = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE online > '$bataswaktu'"));
+  $pengunjungonline = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE online > '$bataswaktu'"));
 
   $path = "counter/";
   $ext = ".png";
@@ -426,6 +428,7 @@
   
   
   <?php 
+  $iyasrini = isset($iyasrini) ? $iyasrini:'';
   if ($iyasrini==2){
   ?>
 

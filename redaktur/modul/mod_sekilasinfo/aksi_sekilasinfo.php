@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "<link href='../../css/zalstyle.css' rel='stylesheet' type='text/css'>
@@ -23,12 +25,12 @@ include "../../../config/koneksi.php";
 include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus sekilas info
 if ($module=='sekilasinfo' AND $act=='hapus'){
-  mysql_query("DELETE FROM sekilasinfo WHERE id_sekilas='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM sekilasinfo WHERE id_sekilas='$_GET[id]'");
   header('location:../../media.php?module='.$module);
 }
 
@@ -40,7 +42,7 @@ elseif ($module=='sekilasinfo' AND $act=='input'){
   // Apabila ada gambar yang diupload
   if (!empty($lokasi_file)){
     UploadInfo($nama_file);
-    mysql_query("INSERT INTO sekilasinfo(info,
+    mysqli_query($conn,"INSERT INTO sekilasinfo(info,
                                     tgl_posting,
                                     gambar) 
                             VALUES('$_POST[info]',
@@ -48,7 +50,7 @@ elseif ($module=='sekilasinfo' AND $act=='input'){
                                    '$nama_file')");
   }
   else{
-    mysql_query("INSERT INTO sekilasinfo(info,
+    mysqli_query($conn,"INSERT INTO sekilasinfo(info,
                                     tgl_posting) 
                             VALUES('$_POST[info]',
                                    '$tgl_sekarang')");
@@ -63,12 +65,12 @@ elseif ($module=='sekilasinfo' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-    mysql_query("UPDATE sekilasinfo SET info = '$_POST[info]'
+    mysqli_query($conn,"UPDATE sekilasinfo SET info = '$_POST[info]'
                              WHERE id_sekilas = '$_POST[id]'");
   }
   else{
     UploadInfo($nama_file);
-    mysql_query("UPDATE sekilasinfo SET info = '$_POST[info]',
+    mysqli_query($conn,"UPDATE sekilasinfo SET info = '$_POST[info]',
                                    gambar    = '$nama_file'   
                              WHERE id_sekilas= '$_POST[id]'");
   }

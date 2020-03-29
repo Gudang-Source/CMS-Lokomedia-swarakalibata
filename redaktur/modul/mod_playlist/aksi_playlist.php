@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -10,8 +12,8 @@ include "../../../config/koneksi.php";
 include "../../../config/fungsi_seo.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Input playlist
 if ($module=='playlist' AND $act=='input'){
@@ -25,7 +27,7 @@ if ($module=='playlist' AND $act=='input'){
   // Apabila ada gambar yang diupload
   if (!empty($lokasi_file)){
     UploadPlaylist($nama_file_unik);
-    mysql_query("INSERT INTO playlist(jdl_playlist,
+    mysqli_query($conn,"INSERT INTO playlist(jdl_playlist,
 	                                    username,
                                     playlist_seo,
                                     gbr_playlist) 
@@ -35,7 +37,7 @@ if ($module=='playlist' AND $act=='input'){
                                    '$nama_file_unik')");
   }
   else{
-    mysql_query("INSERT INTO playlist(jdl_playlist,
+    mysqli_query($conn,"INSERT INTO playlist(jdl_playlist,
 	                                        username,
                                     playlist_seo) 
                             VALUES('$_POST[jdl_playlist]',
@@ -56,7 +58,7 @@ elseif ($module=='playlist' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-    mysql_query("UPDATE playlist SET jdl_playlist     = '$_POST[jdl_playlist]',
+    mysqli_query($conn,"UPDATE playlist SET jdl_playlist     = '$_POST[jdl_playlist]',
                                   playlist_seo     = '$playlist_seo', 
                                   aktif='$_POST[aktif]' 
                              WHERE id_playlist = '$_POST[id]'");
@@ -65,12 +67,12 @@ elseif ($module=='playlist' AND $act=='update'){
     UploadPlaylist($nama_file_unik);
 	
 	
-    $data_gambar = mysql_query("SELECT gbr_playlist FROM playlist WHERE id_playlist='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);	
+    $data_gambar = mysqli_query($conn,"SELECT gbr_playlist FROM playlist WHERE id_playlist='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);	
 	@unlink('../../../img_playlist/'.'kecil_'.$r['gbr_playlist']);
 	@unlink('../../../img_playlist/'.$r['gbr_playlist']);
 	
-    mysql_query("UPDATE playlist SET jdl_playlist  = '$_POST[jdl_playlist]',
+    mysqli_query($conn,"UPDATE playlist SET jdl_playlist  = '$_POST[jdl_playlist]',
                                    playlist_seo = '$playlist_seo',
                                    gbr_playlist    = '$nama_file_unik', 
                                    aktif='$_POST[aktif]'    

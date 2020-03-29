@@ -23,14 +23,14 @@
   $cari .= " OR "; } }
   
   $cari .= " ORDER BY id_berita DESC LIMIT 3";
-  $hasil  = mysql_query($cari);
-  $ketemu = mysql_num_rows($hasil);
+  $hasil  = mysqli_query($conn,$cari);
+  $ketemu = mysqli_num_rows($hasil);
 
   if ($ketemu > 0){
   echo "<h5>Ditemukan <span class style=\"color:#EA1C1C;\">$ketemu berita teratas </span>dengan kata <font style='background-color:#EA1C1C'>
   <class style=\"color:#fff;\">$kata</font>:</h5><br/>"; 
 	
-  while($t=mysql_fetch_array($hasil)){
+  while($t=mysqli_fetch_array($hasil)){
 	
   echo "<div class='item'>
   <h2><a href=berita-$t[judul_seo].html>$t[judul]</a></h2>";
@@ -58,9 +58,9 @@
   <div class="sidebar-title"><b>BERITA SEBELUMNYA </b></div>
   <div class="list">
   <?php    
-  $terkini=mysql_query("SELECT * FROM berita 
+  $terkini=mysqli_query($conn,"SELECT * FROM berita 
   WHERE headline='N' ORDER BY id_berita DESC LIMIT 8,5");
-  while($t=mysql_fetch_array($terkini)){
+  while($t=mysqli_fetch_array($terkini)){
   $tgl = tgl_indo($t['tanggal']);
   echo "<div class='item'>
   <div class='image'>

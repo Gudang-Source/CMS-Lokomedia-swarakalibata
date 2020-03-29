@@ -9,14 +9,14 @@ function confirmdelete(delUrl) {
 <?php
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $base_url = $_SERVER['HTTP_HOST'];
-  $iden=mysql_fetch_array(mysql_query("SELECT * FROM identitas"));
+  $iden=mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM identitas"));
 
 $aksi="modul/mod_hubungi/aksi_hubungi.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Hubungi Kami
   default:
    
@@ -50,11 +50,11 @@ switch($_GET[act]){
     $batas  = 10;
     $posisi = $p->cariPosisi($batas);
 
-    $tampil=mysql_query("SELECT * FROM hubungi ORDER BY id_hubungi DESC");
+    $tampil=mysqli_query($conn,"SELECT * FROM hubungi ORDER BY id_hubungi DESC");
 
     $no = $posisi+1;
-    while ($r=mysql_fetch_array($tampil)){
-      $tgl=tgl_indo($r[tanggal]);
+    while ($r=mysqli_fetch_array($tampil)){
+      $tgl=tgl_indo($r['tanggal']);
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -69,7 +69,7 @@ switch($_GET[act]){
       }      
     } 
 
-	  if($r[dibaca]=='N'){
+	  if($r['dibaca']=='N'){
 	  
     echo "<tr class=gradeX> 
       <td width=50><center><b>$g</b></center></td>
@@ -81,10 +81,10 @@ switch($_GET[act]){
       <td width=80>
 	 <a href=?module=hubungi&act=balasemail&id=$r[id_hubungi] title='Baca' class='with-tip'>
      <center><img src='img/edit.png'></a>
-   
+   &nbsp;
     <a href=javascript:confirmdelete('$aksi?module=hubungi&act=hapus&id=$r[id_hubungi]') 
     title='Hapus' class='with-tip'>
-    &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+    <img src='img/hapus.png'></center></a> 
 	 </td></tr>";
 	 
 	  } 
@@ -107,16 +107,16 @@ echo "<tr class=gradeX>
     $no++;
     }
     echo "</table>";
-    $jmldata=mysql_num_rows(mysql_query("SELECT * FROM hubungi"));
+    $jmldata=mysqli_num_rows(mysqli_query($conn,"SELECT * FROM hubungi"));
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
-    $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
+    $linkHalaman = $p->navHalaman($_GET['halaman'], $jmlhalaman);
 
     break;
 
   case "balasemail":
-    $tampil = mysql_query("SELECT * FROM hubungi WHERE id_hubungi='$_GET[id]'");
-    $r      = mysql_fetch_array($tampil);
-	mysql_query("UPDATE hubungi SET dibaca='Y' WHERE id_hubungi='$_GET[id]'");
+    $tampil = mysqli_query($conn,"SELECT * FROM hubungi WHERE id_hubungi='$_GET[id]'");
+    $r      = mysqli_fetch_array($tampil);
+	mysqli_query($conn,"UPDATE hubungi SET dibaca='Y' WHERE id_hubungi='$_GET[id]'");
 
     echo "
    <div id='main-content'>
@@ -154,22 +154,22 @@ echo "<tr class=gradeX>
      <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=hubungi'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=hubungi'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-     <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Kirim &nbsp;&nbsp;&nbsp;&nbsp;'>
+     <input type='submit' name='upload' class='button' value=' Kirim &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </form>";
 	  		  
      break;
 	 
  //HARUS DIRUBAH (setting email)
   case "kirimemail":
-  $dari = "From: $iden[nama_website] <".$iden[email].">\n" . 
+  $dari = "From: $iden[nama_website] <".$iden['email'].">\n" . 
 "MIME-Version: 1.0\n" . 
 "Content-type: text/html; charset=iso-8859-1";
 
-    mail($_POST[email],$_POST[subjek],$_POST[pesan],$dari);
+    mail($_POST['email'],$_POST['subjek'],$_POST['pesan'],$dari);
 	
     echo "
    <div id='main-content'>
@@ -190,7 +190,7 @@ echo "<tr class=gradeX>
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=hubungi'>Kembali</a>
+   <a class='button red' id='reset-validate-form' href='?module=hubungi'>Kembali</a>
    </li> </ul>
    </form>";
    

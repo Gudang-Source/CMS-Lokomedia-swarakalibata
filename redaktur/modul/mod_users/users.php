@@ -7,8 +7,10 @@ function confirmdelete(delUrl) {
 </script>
 
 
-<?php    
-session_start();
+<?php
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 //Deteksi hanya bisa diinclude, tidak bisa langsung dibuka (direct open)
 if(count(get_included_files())==1)
 {
@@ -23,12 +25,12 @@ if(count(get_included_files())==1)
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 
 $aksi="modul/mod_users/aksi_users.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil User
   default:
 echo "";
@@ -73,15 +75,15 @@ echo "";
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
 
-   if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM users ORDER BY id_session DESC LIMIT $posisi,$batas");
+   if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM users ORDER BY id_session DESC LIMIT $posisi,$batas");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM users WHERE username='$_SESSION[namauser]'");
+      $tampil=mysqli_query($conn,"SELECT * FROM users WHERE username='$_SESSION[namauser]'");
     }
   
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
+    while($r=mysqli_fetch_array($tampil)){
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -119,7 +121,7 @@ echo "";
   
   
    case "tambahuser":
-   if ($_SESSION[leveluser]=='admin'){
+   if ($_SESSION['leveluser']=='admin'){
    echo "
    <div id='main-content'>
    <div class='container_12'>
@@ -167,9 +169,9 @@ echo "";
 
    echo "<h3>PILIH HAK AKSES MODUL: </h3>";
 	  
-   $qrMod = mysql_query("SELECT * FROM modul WHERE publish='Y' AND status='user'");
+   $qrMod = mysqli_query($conn,"SELECT * FROM modul WHERE publish='Y' AND status='user'");
 	 
-   while($mod=mysql_fetch_array($qrMod)){
+   while($mod=mysqli_fetch_array($qrMod)){
    echo "<label><input name='modul[]' type='checkbox' value='$mod[id_modul]' /> 
    <span class style=\"color:#000;\">$mod[nama_modul]</span></label> ";}
 
@@ -177,11 +179,11 @@ echo "";
     echo "<br/><br/><div class=block-actions> 
     <ul class=actions-right> 
     <li>
-    <a class='button red' id=reset-validate-form href='?module=user'>Batal</a>
+    <a class='button red' id='reset-validate-form' href='?module=user'>Batal</a>
     </li> </ul>
     <ul class=actions-left> 
     <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>"; }
 	  
 	 
@@ -200,9 +202,9 @@ echo "";
    break;
     
    case "edituser":
-   $edit=mysql_query("SELECT * FROM users WHERE id_session='$_GET[id]'");
-   $r=mysql_fetch_array($edit);
-   if($_SESSION[leveluser]=='admin'){
+   $edit=mysqli_query($conn,"SELECT * FROM users WHERE id_session='$_GET[id]'");
+   $r=mysqli_fetch_array($edit);
+   if($_SESSION['leveluser']=='admin'){
 	
 		  
    echo "
@@ -257,7 +259,7 @@ echo "";
    </p><br/>";
 		  
 	
-    if ($r[blokir]=='N'){
+    if ($r['blokir']=='N'){
       echo "<tr><td>Blokir</td>     <td> : <input type=radio name='blokir' value='Y'> Ya   
                                            <input type=radio name='blokir' value='N' checked> Tidak </td></tr>";}
     else{
@@ -265,11 +267,11 @@ echo "";
                                            <input type=radio name='blokir' value='N'> Tidak </td></tr>";}
 										  
 	
-	$qrMod1 = mysql_query("SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul 
+	$qrMod1 = mysqli_query($conn,"SELECT * FROM modul,users_modul WHERE modul.id_modul=users_modul.id_modul 
 	AND users_modul.id_session='$_GET[id]'");
 	
 	echo "<br/><br/><tr><td><b>Hak Akses</b></td><td> :";
-	while($mod1=mysql_fetch_array($qrMod1)){
+	while($mod1=mysqli_fetch_array($qrMod1)){
 	
 	echo " ( $mod1[nama_modul] -  
 	<a href=javascript:confirmdelete('$aksi?module=user&act=hapusmodule&id=$mod1[id_umod]&sessid=$_GET[id]')>
@@ -279,10 +281,10 @@ echo "";
 	 
 	echo "</td></tr>";
 	
-    $qrMod = mysql_query("SELECT * FROM modul WHERE publish='Y' AND status='user'");
+    $qrMod = mysqli_query($conn,"SELECT * FROM modul WHERE publish='Y' AND status='user'");
 	echo "<br/><br/><tr><td valign=top><b>Tambah Modul</b></td><td> : ";
 	
-	while($mod=mysql_fetch_array($qrMod)){
+	while($mod=mysqli_fetch_array($qrMod)){
 	echo "<label><input name='modul[]' type='checkbox' value='$mod[id_modul]' />$mod[nama_modul]</label> ";}
 	
 	echo "</td></tr>";
@@ -290,11 +292,11 @@ echo "";
     echo "<br/><br/><div class=block-actions> 
     <ul class=actions-right> 
     <li>
-    <a class='button red' id=reset-validate-form href='?module=user'>Batal</a>
+    <a class='button red' id='reset-validate-form' href='?module=user'>Batal</a>
     </li> </ul>
     <ul class=actions-left> 
     <li>
-    <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+    <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	</form>";}
 	
 	
@@ -355,11 +357,11 @@ echo "";
     echo "<br/><br/><div class=block-actions> 
     <ul class=actions-right> 
     <li>
-    <a class='button red' id=reset-validate-form href='?module=user'>Batal</a>
+    <a class='button red' id='reset-validate-form' href='?module=user'>Batal</a>
     </li> </ul>
     <ul class=actions-left> 
     <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	</form>";}     
 	
     break;  

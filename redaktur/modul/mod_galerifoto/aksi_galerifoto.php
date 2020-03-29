@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "<link href='../../css/zalstyle.css' rel='stylesheet' type='text/css'>
@@ -77,24 +79,24 @@ include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 include "../../../config/fungsi_seo.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus gallery
 if ($module=='galerifoto' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gbr_gallery FROM gallery WHERE id_gallery='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gbr_gallery FROM gallery WHERE id_gallery='$_GET[id]'"));
   if ($data['gbr_gallery']!=''){
-     mysql_query("DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
      unlink("../../../img_galeri/$_GET[namafile]");   
      unlink("../../../img_galeri/kecil_$_GET[namafile]");   
   }
   else{
-     mysql_query("DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
   }
   header('location:../../media.php?module='.$module);
 
 
-  mysql_query("DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM gallery WHERE id_gallery='$_GET[id]'");
   header('location:../../media.php?module='.$module);
 }
 
@@ -115,7 +117,7 @@ elseif ($module=='galerifoto' AND $act=='input'){
 	watermark_image('../../../img_galeri/'.$nama_file_unik);
 	watermark_image('../../../img_galeri/kecil_'.$nama_file_unik);
 
-   mysql_query("INSERT INTO gallery(jdl_gallery,
+   mysqli_query($conn,"INSERT INTO gallery(jdl_gallery,
                                     gallery_seo,
                                     id_album,
 									username,
@@ -132,7 +134,7 @@ elseif ($module=='galerifoto' AND $act=='input'){
   header('location:../../media.php?module='.$module);
   }
   else{
-     mysql_query("INSERT INTO gallery(jdl_gallery,
+     mysqli_query($conn,"INSERT INTO gallery(jdl_gallery,
                                     gallery_seo,
                                     id_album,
 									username,
@@ -161,7 +163,7 @@ elseif ($module=='galerifoto' AND $act=='update'){
 
   // Apabila gbr_gallery tidak diganti
   if (empty($lokasi_file)){
-     mysql_query("UPDATE gallery SET jdl_gallery  = '$_POST[jdl_gallery]',
+     mysqli_query($conn,"UPDATE gallery SET jdl_gallery  = '$_POST[jdl_gallery]',
                                    gallery_seo   = '$gallery_seo', 
                                    id_album = '$_POST[album]',
                                    keterangan  = '$_POST[keterangan]'  
@@ -172,15 +174,15 @@ elseif ($module=='galerifoto' AND $act=='update'){
   else{    
     //UploadGallerY($nama_file_unik);
 	// Penambahan fitur unlink utk menghapus file yg lama biar gak ngebek-ngebeki server ^_^
-	$data_gbr_gallery= mysql_query("SELECT gbr_gallery FROM gallery WHERE id_gallery='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gbr_gallery);
+	$data_gbr_gallery= mysqli_query($conn,"SELECT gbr_gallery FROM gallery WHERE id_gallery='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gbr_gallery);
 	@unlink('../../../img_galeri/'.$r['gbr_gallery']);
 	@unlink('../../../img_galeri/'.'kecil_'.$r['gbr_gallery']);
     UploadGallerY($nama_file_unik,'../../../img_galeri/',300,120);
 	watermark_image('../../../img_galeri/'.$nama_file_unik);
 	watermark_image('../../../img_galeri/kecil_'.$nama_file_unik);
 	
-	 mysql_query("UPDATE gallery SET jdl_gallery  = '$_POST[jdl_gallery]',
+	 mysqli_query($conn,"UPDATE gallery SET jdl_gallery  = '$_POST[jdl_gallery]',
                                    gallery_seo   = '$gallery_seo', 
                                    id_album = '$_POST[album]',
                                    keterangan  = '$_POST[keterangan]',  

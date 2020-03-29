@@ -1,7 +1,9 @@
 <?php
 include "../config/koneksi.php";
 function anti_injection($data){
-  $filter = mysql_real_escape_string(stripslashes(strip_tags(htmlspecialchars($data,ENT_QUOTES))));
+  global $conn;
+  $filter = mysqli_real_escape_string($conn,$data);
+  $filter = stripslashes(strip_tags(htmlspecialchars($filter,ENT_QUOTES)));
   return $filter;
 }
 
@@ -13,9 +15,9 @@ if (!ctype_alnum($username) OR !ctype_alnum($pass)){
   echo "Sekarang loginnya tidak bisa di injeksi lho.";
 }
 else{
-$login=mysql_query("SELECT * FROM users WHERE username='$username' AND password='$pass' AND blokir='N'");
-$ketemu=mysql_num_rows($login);
-$r=mysql_fetch_array($login);
+$login=mysqli_query($conn,"SELECT * FROM users WHERE username='$username' AND password='$pass' AND blokir='N'");
+$ketemu=mysqli_num_rows($login);
+$r=mysqli_fetch_array($login);
 
 // Apabila username dan password ditemukan
 if ($ketemu > 0){
@@ -24,8 +26,8 @@ if ($ketemu > 0){
   $_SESSION[namauser]     = $r[username];
   $_SESSION[namalengkap]  = $r[nama_lengkap];
   $_SESSION[passuser]     = $r[password];
-  $_SESSION[sessid]       = $r[id_session];
-  $_SESSION[leveluser]    = $r[level];
+  $_SESSION['sessid']       = $r[id_session];
+  $_SESSION['leveluser']    = $r[level];
 
   header('location:media.php?module=home');
 }

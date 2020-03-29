@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -9,8 +11,8 @@ else{
 include "../../../config/koneksi.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Update identitas
 if ($module=='identitas' AND $act=='update'){
@@ -20,7 +22,7 @@ if ($module=='identitas' AND $act=='update'){
   // Apabila ada gambar yang diupload
   if (!empty($lokasi_file)){
     UploadFavicon($nama_file);
-    mysql_query("UPDATE identitas SET nama_website   = '$_POST[nama_website]',
+    mysqli_query($conn,"UPDATE identitas SET nama_website   = '$_POST[nama_website]',
 	                                         email   = '$_POST[email]',
 	                                       url       = '$_POST[url]',
 										  facebook   = '$_POST[facebook]',
@@ -32,7 +34,7 @@ if ($module=='identitas' AND $act=='update'){
                                 WHERE id_identitas   = '$_POST[id]'");
   }
   else{
-    mysql_query("UPDATE identitas SET nama_website   = '$_POST[nama_website]',
+    mysqli_query($conn,"UPDATE identitas SET nama_website   = '$_POST[nama_website]',
 	                                   email   = '$_POST[email]',
 	                                        url       = '$_POST[url]',
 										  facebook   = '$_POST[facebook]',

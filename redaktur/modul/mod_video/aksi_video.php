@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -11,12 +13,12 @@ include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 include "../../../config/fungsi_seo.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus video
 if ($module=='video' AND $act=='hapus'){
-  mysql_query("DELETE FROM video WHERE id_video='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM video WHERE id_video='$_GET[id]'");
   unlink("../../../img_video/$_GET[namafile]");
   unlink("../../../img_video/kecil_$_GET[namafile]");   
   header('location:../../media.php?module='.$module);
@@ -45,7 +47,7 @@ elseif ($module=='video' AND $act=='input'){
     UploadVideo($nama_file_unik);
 	if(!empty($lokasi_file2)){
 			UploadVideo2($nama_file_unik2);
-    mysql_query("INSERT INTO video(jdl_video,
+    mysqli_query($conn,"INSERT INTO video(jdl_video,
                                     video_seo,
                                     id_playlist,
 									username,
@@ -71,7 +73,7 @@ elseif ($module=='video' AND $act=='input'){
 								   '$nama_file_unik2')");
 	}
 	elseif(empty($lokasi_file2)){
-		mysql_query("INSERT INTO video(jdl_video,
+		mysqli_query($conn,"INSERT INTO video(jdl_video,
                                     video_seo,
                                     id_playlist,
 									username,
@@ -99,7 +101,7 @@ elseif ($module=='video' AND $act=='input'){
   else{
 	  if(!empty($lokasi_file2)){
 			UploadVideo2($nama_file_unik2);
-    mysql_query("INSERT INTO video(jdl_video,
+    mysqli_query($conn,"INSERT INTO video(jdl_video,
                                     video_seo,
                                     id_playlist,
 									username,
@@ -123,7 +125,7 @@ elseif ($module=='video' AND $act=='input'){
 								   '$nama_file_unik2')");
 	}
 	elseif(empty($lokasi_file2)){
-    mysql_query("INSERT INTO video(jdl_video,
+    mysqli_query($conn,"INSERT INTO video(jdl_video,
                                     video_seo,
                                     id_playlist,
 									username,
@@ -147,7 +149,7 @@ elseif ($module=='video' AND $act=='input'){
   }
   $jml=count($tag_seo);
   for($i=0;$i<$jml;$i++){
-    mysql_query("UPDATE tagvid SET count=count+1 WHERE tag_seo='$tag_seo[$i]'");
+    mysqli_query($conn,"UPDATE tagvid SET count=count+1 WHERE tag_seo='$tag_seo[$i]'");
   }
   header('location:../../media.php?module='.$module);
 }
@@ -176,12 +178,12 @@ elseif ($module=='video' AND $act=='update'){
   UploadVideo2($nama_file_unik2);
 			
 
-    $data_video = mysql_query("SELECT video FROM video WHERE id_video='$_POST[id]'");
-	$d   	= mysql_fetch_array($data_video);	
+    $data_video = mysqli_query($conn,"SELECT video FROM video WHERE id_video='$_POST[id]'");
+	$d   	= mysqli_fetch_array($data_video);	
 	@unlink('../../../img_video/'.$d['video']);
 
 			
-    mysql_query("UPDATE video SET jdl_video  = '$_POST[jdl_video]',
+    mysqli_query($conn,"UPDATE video SET jdl_video  = '$_POST[jdl_video]',
                                    video_seo   = '$video_seo', 
                                    id_playlist = '$_POST[playlist]',
                                    keterangan  = '$_POST[keterangan]',
@@ -191,7 +193,7 @@ elseif ($module=='video' AND $act=='update'){
                              WHERE id_video   = '$_POST[id]'");
 	  }
 	  elseif(empty($lokasi_file2)){
-		  mysql_query("UPDATE video SET jdl_video  = '$_POST[jdl_video]',
+		  mysqli_query($conn,"UPDATE video SET jdl_video  = '$_POST[jdl_video]',
 
                                   video_seo   = '$video_seo', 
                                    id_playlist = '$_POST[playlist]',
@@ -209,7 +211,7 @@ elseif ($module=='video' AND $act=='update'){
 	UploadVideo2($nama_file_unik2);
 
 			
-    mysql_query("UPDATE video SET jdl_video  = '$_POST[jdl_video]',
+    mysqli_query($conn,"UPDATE video SET jdl_video  = '$_POST[jdl_video]',
                                    video_seo   = '$video_seo', 
                                    id_playlist = '$_POST[playlist]',
                                    keterangan  = '$_POST[keterangan]',
@@ -222,14 +224,14 @@ elseif ($module=='video' AND $act=='update'){
 	elseif(empty($lokasi_file2)){
 	
 	
-    $data_gambar = mysql_query("SELECT gbr_video FROM video WHERE id_video='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);	
+    $data_gambar = mysqli_query($conn,"SELECT gbr_video FROM video WHERE id_video='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);	
 	@unlink('../../../img_video/'.'kecil_'.$r['gbr_video']);
 	@unlink('../../../img_video/'.$r['gbr_video']);
 
 	
 	
-		mysql_query("UPDATE video SET jdl_video  = '$_POST[jdl_video]',
+		mysqli_query($conn,"UPDATE video SET jdl_video  = '$_POST[jdl_video]',
                                    video_seo   = '$video_seo', 
                                    id_playlist = '$_POST[playlist]',
 								   tagvid         = '$tagvid',

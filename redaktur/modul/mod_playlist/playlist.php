@@ -9,7 +9,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
  
   echo "
@@ -36,11 +38,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_playlist/aksi_playlist.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
   // Tampil Playlist
   default:
@@ -75,17 +77,17 @@ switch($_GET[act]){
    <tbody>";
 	
 	
-	  if ($_SESSION[leveluser]=='admin'){
-    $tampil = mysql_query("SELECT * FROM playlist ORDER BY id_playlist DESC");
+	  if ($_SESSION['leveluser']=='admin'){
+    $tampil = mysqli_query($conn,"SELECT * FROM playlist ORDER BY id_playlist DESC");
 	}
     else{
-    $tampil=mysql_query("SELECT * FROM playlist 
+    $tampil=mysqli_query($conn,"SELECT * FROM playlist 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_playlist  DESC");}
 	
 	
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -150,11 +152,11 @@ switch($_GET[act]){
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=playlist'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=playlist'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
   </form>";
 			
@@ -162,8 +164,8 @@ switch($_GET[act]){
   
   // Form Edit Playlist  
   case "editplaylist":
-    $edit=mysql_query("SELECT * FROM playlist WHERE id_playlist='$_GET[id]'");
-    $r=mysql_fetch_array($edit);
+    $edit=mysqli_query($conn,"SELECT * FROM playlist WHERE id_playlist='$_GET[id]'");
+    $r=mysqli_fetch_array($edit);
 
     echo "
    <div id='main-content'>
@@ -197,7 +199,7 @@ switch($_GET[act]){
    <input type=file name='fupload' size=30>
    </p>";
 		  
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Tampilkan</label>
@@ -217,11 +219,11 @@ switch($_GET[act]){
     echo " <div class=block-actions> 
       <ul class=actions-right> 
       <li>
-      <a class='button red' id=reset-validate-form href='?module=playlist'>Batal</a>
+      <a class='button red' id='reset-validate-form' href='?module=playlist'>Batal</a>
       </li> </ul>
       <ul class=actions-left> 
       <li>
-      <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+      <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
 	  </li> </ul>
 	  </form>";
 		  

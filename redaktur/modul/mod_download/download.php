@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -8,11 +10,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_download/aksi_download.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Download
   default:
     echo "<h2>Edit Download</h2>
@@ -24,10 +26,10 @@ switch($_GET[act]){
     $batas  = 15;
     $posisi = $p->cariPosisi($batas);
 
-    $tampil=mysql_query("SELECT * FROM download ORDER BY id_download DESC LIMIT $posisi,$batas");
+    $tampil=mysqli_query($conn,"SELECT * FROM download ORDER BY id_download DESC LIMIT $posisi,$batas");
 
     $no = $posisi+1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
       $tgl=tgl_indo($r[tgl_posting]);
       echo "<tr><td>$no</td>
                 <td>$r[judul]</td>
@@ -39,7 +41,7 @@ switch($_GET[act]){
     $no++;
     }
     echo "</table>";
-    $jmldata=mysql_num_rows(mysql_query("SELECT * FROM download"));
+    $jmldata=mysqli_num_rows(mysqli_query($conn,"SELECT * FROM download"));
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
     $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
 
@@ -58,8 +60,8 @@ switch($_GET[act]){
      break;
     
   case "editdownload":
-    $edit = mysql_query("SELECT * FROM download WHERE id_download='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM download WHERE id_download='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
     echo "<h2>Edit File Download</h2>
           <form method=POST enctype='multipart/form-data' action=$aksi?module=download&act=update>

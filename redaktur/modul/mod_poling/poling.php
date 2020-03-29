@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -25,11 +27,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_poling/aksi_poling.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
 //update/////////////////////////////////////
 
@@ -68,17 +70,17 @@ echo "
 	</thead>
    <tbody>";
 
-    if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM poling ORDER BY id_poling DESC");
+    if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM poling ORDER BY id_poling DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM poling 
+      $tampil=mysqli_query($conn,"SELECT * FROM poling 
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_poling DESC");
     }
-  
+    $posisi = 0;
     $no = $posisi+1;
-    while($r=mysql_fetch_array($tampil)){
+    while($r=mysqli_fetch_array($tampil)){
     $lebar=strlen($no);
     switch($lebar){
       case 1:
@@ -111,11 +113,11 @@ echo "
       }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM poling"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM poling"));
       }
         else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM poling WHERE username='$_SESSION[namauser]'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM poling WHERE username='$_SESSION[namauser]'"));
       }  
       break;    
       }
@@ -134,18 +136,18 @@ echo "<table id='table-example' class='table'>
 	</thead>
     <tbody>";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM poling WHERE pilihan LIKE '%$_GET[kata]%' ORDER BY id_poling DESC");
+      if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM poling WHERE pilihan LIKE '%$_GET[kata]%' ORDER BY id_poling DESC");
       }
       else{
-      $tampil=mysql_query("SELECT * FROM poling 
+      $tampil=mysqli_query($conn,"SELECT * FROM poling 
                            WHERE username='$_SESSION[namauser]'
                            AND pilihan LIKE '%$_GET[kata]%'       
                            ORDER BY id_poling DESC");
       }
   
       $no = $posisi+1;
-      while($r=mysql_fetch_array($tampil)){
+      while($r=mysqli_fetch_array($tampil)){
 	  
   echo "<tr class=gradeX>
    <td><center>$no</center></td>
@@ -165,11 +167,11 @@ echo "<table id='table-example' class='table'>
      }
 echo "</tbody></table> ";
 
-      if ($_SESSION[leveluser]=='admin'){
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM poling WHERE pilihan LIKE '%$_GET[kata]%'"));
+      if ($_SESSION['leveluser']=='admin'){
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM poling WHERE pilihan LIKE '%$_GET[kata]%'"));
       }
       else{
-      $jmldata = mysql_num_rows(mysql_query("SELECT * FROM poling WHERE username='$_SESSION[namauser]' AND pilihan LIKE '%$_GET[kata]%'"));
+      $jmldata = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM poling WHERE username='$_SESSION[namauser]' AND pilihan LIKE '%$_GET[kata]%'"));
       }  
       break;    
       }
@@ -212,18 +214,18 @@ echo "</tbody></table> ";
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=poling'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=poling'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";
 		  
   break;
   case "editpoling":
-    $edit = mysql_query("SELECT * FROM poling WHERE id_poling='$_GET[id]' AND username='$_SESSION[namauser]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM poling WHERE id_poling='$_GET[id]' AND username='$_SESSION[namauser]'");
+    $r    = mysqli_fetch_array($edit);
 
     echo "
    <div id='main-content'>
@@ -248,7 +250,7 @@ echo "</tbody></table> ";
    </p>";
      
 
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Aktif</label>
@@ -265,7 +267,7 @@ echo "</tbody></table> ";
    </p>";}
 
 
-   if ($r[status]=='Jawaban'){
+   if ($r['status']=='Jawaban'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Status</label>
@@ -286,11 +288,11 @@ echo "</tbody></table> ";
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=poling'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=poling'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";
    

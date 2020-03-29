@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -25,11 +27,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_iklantengah/aksi_iklantengah.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Banner
   default:
   
@@ -58,19 +60,19 @@ switch($_GET[act]){
   </thead>
    <tbody>";
 	
-	  if ($_SESSION[leveluser]=='admin'){
-      $tampil = mysql_query("SELECT * FROM iklantengah ORDER BY id_iklantengah DESC");
+	  if ($_SESSION['leveluser']=='admin'){
+      $tampil = mysqli_query($conn,"SELECT * FROM iklantengah ORDER BY id_iklantengah DESC");
     }
     else{
-      $tampil=mysql_query("SELECT * FROM iklantengah
+      $tampil=mysqli_query($conn,"SELECT * FROM iklantengah
                            WHERE username='$_SESSION[namauser]'       
                            ORDER BY id_iklantengah DESC");
     }
 	
 	
     $no=1;
-    while ($r=mysql_fetch_array($tampil)){
-      $tgl=tgl_indo($r[tgl_posting]);
+    while ($r=mysqli_fetch_array($tampil)){
+      $tgl=tgl_indo($r['tgl_posting']);
 	  
 	  
    echo "<tr class=gradeX>
@@ -123,19 +125,19 @@ switch($_GET[act]){
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=iklantengah'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=iklantengah'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";
 		  
 		  
   break;
   case "editiklantengah":
-    $edit = mysql_query("SELECT * FROM iklantengah WHERE id_iklantengah='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM iklantengah WHERE id_iklantengah='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
   
     echo "
@@ -177,11 +179,11 @@ switch($_GET[act]){
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=iklantengah'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=iklantengah'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </li> </ul>
    </form>";		  
 

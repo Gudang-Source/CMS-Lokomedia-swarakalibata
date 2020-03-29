@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "<link href='../../css/zalstyle.css' rel='stylesheet' type='text/css'>
@@ -23,19 +25,19 @@ include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 include "../../../config/fungsi_seo.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus berita
 if ($module=='berita' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gambar FROM berita WHERE id_berita='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gambar FROM berita WHERE id_berita='$_GET[id]'"));
   if ($data[gambar]!=''){
-     mysql_query("DELETE FROM berita WHERE id_berita='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM berita WHERE id_berita='$_GET[id]'");
      unlink("../../../foto_berita/$_GET[namafile]");   
      unlink("../../../foto_berita/small_$_GET[namafile]");   
   }
   else{
-     mysql_query("DELETE FROM berita WHERE id_berita='$_GET[id]'");
+     mysqli_query($conn,"DELETE FROM berita WHERE id_berita='$_GET[id]'");
   }
   header('location:../../media.php?module='.$module);
 }
@@ -59,7 +61,7 @@ elseif ($module=='berita' AND $act=='input'){
   if (!empty($lokasi_file)){
     UploadImage($nama_file_unik);
 
-   mysql_query("INSERT INTO berita( judul,
+   mysqli_query($conn,"INSERT INTO berita( judul,
                                     sub_judul,
 									youtube,
                                     judul_seo,
@@ -96,7 +98,7 @@ elseif ($module=='berita' AND $act=='input'){
   header('location:../../media.php?module='.$module);
   }
   else{
-   mysql_query("INSERT INTO berita( judul,
+   mysqli_query($conn,"INSERT INTO berita( judul,
                                     sub_judul,
 									youtube,
                                     judul_seo,
@@ -131,7 +133,7 @@ elseif ($module=='berita' AND $act=='input'){
   
   $jml=count($tag_seo);
   for($i=0;$i<$jml;$i++){
-    mysql_query("UPDATE tag SET count=count+1 WHERE tag_seo='$tag_seo[$i]'");
+    mysqli_query($conn,"UPDATE tag SET count=count+1 WHERE tag_seo='$tag_seo[$i]'");
   }
 }
 // Update berita
@@ -150,7 +152,7 @@ elseif ($module=='berita' AND $act=='update'){
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-    mysql_query("UPDATE berita  berita SET judul       = '$_POST[judul]',
+    mysqli_query($conn,"UPDATE berita  berita SET judul       = '$_POST[judul]',
 	                                sub_judul  = '$_POST[sub_judul]',
 							         youtube   = '$_POST[youtube]',
                                    judul_seo   = '$judul_seo', 
@@ -165,12 +167,12 @@ elseif ($module=='berita' AND $act=='update'){
   header('location:../../media.php?module='.$module);
   }
   else{
-    $data_gambar = mysql_query("SELECT gambar FROM berita WHERE id_berita='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);
+    $data_gambar = mysqli_query($conn,"SELECT gambar FROM berita WHERE id_berita='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);
 	@unlink('../../../foto_berita/'.$r['gambar']);
 	@unlink('../../../foto_berita/'.'small_'.$r['gambar']);
     UploadImage($nama_file_unik,'../../../foto_berita/',300,120);
-     mysql_query("UPDATE berita SET judul       = '$_POST[judul]',
+     mysqli_query($conn,"UPDATE berita SET judul       = '$_POST[judul]',
 	                           sub_judul       = '$_POST[sub_judul]',
 							      youtube      = '$_POST[youtube]',
                                    judul_seo   = '$judul_seo', 

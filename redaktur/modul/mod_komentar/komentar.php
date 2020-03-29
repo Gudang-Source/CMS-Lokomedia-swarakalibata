@@ -8,7 +8,9 @@ function confirmdelete(delUrl) {
 
 
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
  echo "
   <link href='css/zalstyle.css' rel='stylesheet' type='text/css'>";
@@ -35,11 +37,11 @@ session_start();
 else{
 
 //cek hak akses user
-$cek=user_akses($_GET[module],$_SESSION[sessid]);
-if($cek==1 OR $_SESSION[leveluser]=='admin'){
+$cek=user_akses($_GET['module'],$_SESSION['sessid']);
+if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 $aksi="modul/mod_komentar/aksi_komentar.php";
-switch($_GET[act]){
+switch(isset($_GET['act']) ? $_GET['act']:''){
 
 
   // Tampil Komentar
@@ -74,12 +76,12 @@ switch($_GET[act]){
     $batas  = 20;
     $posisi = $p->cariPosisi($batas);
 
-    $tampil=mysql_query("SELECT * FROM berita,komentar 
+    $tampil=mysqli_query($conn,"SELECT * FROM berita,komentar 
   WHERE komentar.id_berita=berita.id_berita  
   ORDER BY id_komentar DESC");
 
     $no = $posisi+1;
-    while ($r=mysql_fetch_array($tampil)){
+    while ($r=mysqli_fetch_array($tampil)){
 
     $lebar=strlen($no);
     switch($lebar){
@@ -105,9 +107,9 @@ switch($_GET[act]){
    
   <a href=?module=komentar&act=editkomentar&id=$r[id_komentar] title='Edit' class='with-tip'>
   <center><img src='img/edit.png'></a>
-   
+   &nbsp;
   <a href=javascript:confirmdelete('$aksi?module=komentar&act=hapus&id=$r[id_komentar]') title='Hapus' class='with-tip'>
-  &nbsp;&nbsp;&nbsp;&nbsp;<img src='img/hapus.png'></center></a> 
+  <img src='img/hapus.png'></center></a> 
    
   </td></tr>";
 
@@ -116,16 +118,16 @@ switch($_GET[act]){
   echo "</table>";
 	
 	
-    $jmldata=mysql_num_rows(mysql_query("SELECT * FROM komentar"));
+    $jmldata=mysqli_num_rows(mysqli_query($conn,"SELECT * FROM komentar"));
     $jmlhalaman  = $p->jumlahHalaman($jmldata, $batas);
-    $linkHalaman = $p->navHalaman($_GET[halaman], $jmlhalaman);
+    $linkHalaman = $p->navHalaman($_GET['halaman'], $jmlhalaman);
 
    
     break;
   
   case "editkomentar":
-  $edit = mysql_query("SELECT * FROM komentar WHERE id_komentar='$_GET[id]'");
-  $r    = mysql_fetch_array($edit);
+  $edit = mysqli_query($conn,"SELECT * FROM komentar WHERE id_komentar='$_GET[id]'");
+  $r    = mysqli_fetch_array($edit);
 
   echo "
    <div id='main-content'>
@@ -158,7 +160,7 @@ switch($_GET[act]){
    </p>";
 
    
-   if ($r[aktif]=='Y'){
+   if ($r['aktif']=='Y'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Aktif</label>
@@ -178,11 +180,11 @@ switch($_GET[act]){
    echo  "<div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=komentar'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=komentar'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
    
    

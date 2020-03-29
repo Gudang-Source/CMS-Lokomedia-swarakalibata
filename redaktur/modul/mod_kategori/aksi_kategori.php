@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
 if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
 
   echo "<link href='../../css/zalstyle.css' rel='stylesheet' type='text/css'>
@@ -21,12 +23,12 @@ else{
 include "../../../config/koneksi.php";
 include "../../../config/fungsi_seo.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus Kategori
 if ($module=='kategori' AND $act=='hapus'){
-  mysql_query("DELETE FROM kategori WHERE id_kategori='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM kategori WHERE id_kategori='$_GET[id]'");
   header('location:../../media.php?module='.$module);
 }
 
@@ -34,7 +36,7 @@ if ($module=='kategori' AND $act=='hapus'){
 elseif ($module=='kategori' AND $act=='input'){
   $kategori_seo = seo_title($_POST['nama_kategori']);
   
-  mysql_query("INSERT INTO kategori
+  mysqli_query($conn,"INSERT INTO kategori
   (nama_kategori,
   username,
   kategori_seo) 
@@ -50,7 +52,7 @@ elseif ($module=='kategori' AND $act=='input'){
 // Update kategori
 elseif ($module=='kategori' AND $act=='update'){
   $kategori_seo = seo_title($_POST['nama_kategori']);
-  mysql_query("UPDATE kategori SET nama_kategori='$_POST[nama_kategori]', kategori_seo='$kategori_seo', aktif='$_POST[aktif]' 
+  mysqli_query($conn,"UPDATE kategori SET nama_kategori='$_POST[nama_kategori]', kategori_seo='$kategori_seo', aktif='$_POST[aktif]' 
                WHERE id_kategori = '$_POST[id]'");
   header('location:../../media.php?module='.$module);
 }

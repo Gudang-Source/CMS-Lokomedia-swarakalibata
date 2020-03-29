@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
   echo "<link href='style.css' rel='stylesheet' type='text/css'>
  <center>Untuk mengakses modul, Anda harus login <br>";
@@ -12,19 +14,19 @@ include "../../../config/fungsi_seo.php";
 include "../../../config/library.php";
 include "../../../config/fungsi_thumb.php";
 
-$module=$_GET[module];
-$act=$_GET[act];
+$module=$_GET['module'];
+$act=isset($_GET['act']) ? $_GET['act']:'';
 
 // Hapus agenda
 if ($module=='agenda' AND $act=='hapus'){
-  $data=mysql_fetch_array(mysql_query("SELECT gambar FROM agenda WHERE id_agenda='$_GET[id]'"));
+  $data=mysqli_fetch_array(mysqli_query($conn,"SELECT gambar FROM agenda WHERE id_agenda='$_GET[id]'"));
   if ($data['gambar']!=''){
-  mysql_query("DELETE FROM agenda WHERE id_agenda='$_GET[id]'");
+  mysqli_query($conn,"DELETE FROM agenda WHERE id_agenda='$_GET[id]'");
      unlink("../../../foto_agenda/$_GET[namafile]");   
      unlink("../../../foto_agenda/small_$_GET[namafile]");   
   }
   else{
-  mysql_query("DELETE FROM agenda WHERE id_agenda='$_GET[id]'");  
+  mysqli_query($conn,"DELETE FROM agenda WHERE id_agenda='$_GET[id]'");  
   }
   header('location:../../media.php?module='.$module);
 }
@@ -37,8 +39,8 @@ elseif ($module=='agenda' AND $act=='input'){
   $acak           = rand(000000,999999);
   $nama_file_unik = $acak.$nama_file; 
 
-  $mulai=$_POST[thn_mulai].'-'.$_POST[bln_mulai].'-'.$_POST[tgl_mulai];
-  $selesai=$_POST[thn_selesai].'-'.$_POST[bln_selesai].'-'.$_POST[tgl_selesai];
+  $mulai=$_POST['thn_mulai'].'-'.$_POST['bln_mulai'].'-'.$_POST['tgl_mulai'];
+  $selesai=$_POST['thn_selesai'].'-'.$_POST['bln_selesai'].'-'.$_POST['tgl_selesai'];
   
   $tema_seo = seo_title($_POST['tema']);
 
@@ -50,7 +52,7 @@ elseif ($module=='agenda' AND $act=='input'){
     }
     else{
     UploadAgenda($nama_file_unik);
-    mysql_query("INSERT INTO agenda(tema,
+    mysqli_query($conn,"INSERT INTO agenda(tema,
                                   tema_seo, 
                                   isi_agenda,
                                   tempat,
@@ -76,7 +78,7 @@ elseif ($module=='agenda' AND $act=='input'){
   }
   }
   else{
-    mysql_query("INSERT INTO agenda(tema,
+    mysqli_query($conn,"INSERT INTO agenda(tema,
                                   tema_seo, 
                                   isi_agenda,
                                   tempat,
@@ -108,14 +110,14 @@ elseif ($module=='agenda' AND $act=='update'){
   $acak           = rand(000000,999999);
   $nama_file_unik = $acak.$nama_file; 
 
-  $mulai=$_POST[thn_mulai].'-'.$_POST[bln_mulai].'-'.$_POST[tgl_mulai];
-  $selesai=$_POST[thn_selesai].'-'.$_POST[bln_selesai].'-'.$_POST[tgl_selesai];
+  $mulai=$_POST['thn_mulai'].'-'.$_POST['bln_mulai'].'-'.$_POST['tgl_mulai'];
+  $selesai=$_POST['thn_selesai'].'-'.$_POST['bln_selesai'].'-'.$_POST['tgl_selesai'];
 
   $tema_seo = seo_title($_POST['tema']);
 
   // Apabila gambar tidak diganti
   if (empty($lokasi_file)){
-  mysql_query("UPDATE agenda SET tema        = '$_POST[tema]',
+  mysqli_query($conn,"UPDATE agenda SET tema        = '$_POST[tema]',
                                  tema_seo    = '$tema_seo',
                                  isi_agenda  = '$_POST[isi_agenda]',
                                  tgl_mulai   = '$mulai',
@@ -129,18 +131,18 @@ elseif ($module=='agenda' AND $act=='update'){
   else{
     if ($tipe_file != "image/jpeg" AND $tipe_file != "image/pjpeg"){
     echo "<script>window.alert('Upload Gagal, Pastikan File yang di Upload bertipe *.JPG');
-        window.location=('../../media.php?module=album')</script>";
+        window.location=('../../media.php?module=agenda')</script>";
     }
     else{
 	
-	$data_gambar = mysql_query("SELECT gambar FROM agenda WHERE id_agenda='$_POST[id]'");
-	$r    	= mysql_fetch_array($data_gambar);
+	$data_gambar = mysqli_query($conn,"SELECT gambar FROM agenda WHERE id_agenda='$_POST[id]'");
+	$r    	= mysqli_fetch_array($data_gambar);
 	@unlink('../../../foto_agenda/'.$r['gambar']);
 	@unlink('../../../foto_agenda/'.'small_'.$r['gambar']);
     UploadAgenda($nama_file_unik,'../../../foto_agenda/',300,120);
 	
   
-    mysql_query("UPDATE agenda SET tema      = '$_POST[tema]',
+    mysqli_query($conn,"UPDATE agenda SET tema      = '$_POST[tema]',
                                  tema_seo    = '$tema_seo',
                                  isi_agenda  = '$_POST[isi_agenda]',
                                  tgl_mulai   = '$mulai',

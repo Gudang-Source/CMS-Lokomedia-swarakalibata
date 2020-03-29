@@ -60,23 +60,23 @@
   $waktu   = time(); // 
 
   // Mencek berdasarkan IPnya, apakah user sudah pernah mengakses hari ini 
-  $s = mysql_query("SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
+  $s = mysqli_query($conn,"SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
   // Kalau belum ada, simpan data user tersebut ke database
-  if(mysql_num_rows($s) == 0){
-    mysql_query("INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
+  if(mysqli_num_rows($s) == 0){
+    mysqli_query($conn,"INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
   } 
   else{
-    mysql_query("UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
+    mysqli_query($conn,"UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
   }
 
-  $pengunjung       = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
-  $totalpengunjung  = mysql_result(mysql_query("SELECT COUNT(hits) FROM statistik"), 0); 
-  $hits             = mysql_fetch_assoc(mysql_query("SELECT SUM(hits) as hitstoday FROM statistik 
+  $pengunjung       = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
+  $totalpengunjung  = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(hits) as hits FROM statistik"))['hits']; 
+  $hits             = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hitstoday FROM statistik 
   WHERE tanggal='$tanggal' GROUP BY  tanggal")); 
-  $totalhits        = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
-  $tothitsgbr       = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
+  $totalhits        = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hits FROM statistik"))['hits']; 
+  $tothitsgbr       = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hits FROM statistik"))['hits']; 
   $bataswaktu       = time() - 300;
-  $pengunjungonline = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE online > '$bataswaktu'"));
+  $pengunjungonline = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE online > '$bataswaktu'"));
 
   $path = "counter/";
   $ext = ".png";
@@ -115,22 +115,22 @@
   $waktu   = time(); // 
 
   // Mencek berdasarkan IPnya, apakah user sudah pernah mengakses hari ini 
-  $s = mysql_query("SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
+  $s = mysqli_query($conn,"SELECT * FROM statistik WHERE ip='$ip' AND tanggal='$tanggal'");
   // Kalau belum ada, simpan data user tersebut ke database
-  if(mysql_num_rows($s) == 0){
-    mysql_query("INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
+  if(mysqli_num_rows($s) == 0){
+    mysqli_query($conn,"INSERT INTO statistik(ip, tanggal, hits, online) VALUES('$ip','$tanggal','1','$waktu')");
   } 
   else{
-    mysql_query("UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
+    mysqli_query($conn,"UPDATE statistik SET hits=hits+1, online='$waktu' WHERE ip='$ip' AND tanggal='$tanggal'");
   }
 
-  $pengunjung       = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
-  $totalpengunjung  = mysql_result(mysql_query("SELECT COUNT(hits) FROM statistik"), 0); 
-  $hits             = mysql_fetch_assoc(mysql_query("SELECT SUM(hits) as hitstoday FROM statistik WHERE tanggal='$tanggal' GROUP BY tanggal")); 
-  $totalhits        = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
-  $tothitsgbr       = mysql_result(mysql_query("SELECT SUM(hits) FROM statistik"), 0); 
+  $pengunjung       = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE tanggal='$tanggal' GROUP BY ip"));
+  $totalpengunjung  = mysql_result(mysqli_query($conn,"SELECT COUNT(hits) FROM statistik"), 0); 
+  $hits             = mysqli_fetch_assoc(mysqli_query($conn,"SELECT SUM(hits) as hitstoday FROM statistik WHERE tanggal='$tanggal' GROUP BY tanggal")); 
+  $totalhits        = mysql_result(mysqli_query($conn,"SELECT SUM(hits) FROM statistik"), 0); 
+  $tothitsgbr       = mysql_result(mysqli_query($conn,"SELECT SUM(hits) FROM statistik"), 0); 
   $bataswaktu       = time() - 300;
-  $pengunjungonline = mysql_num_rows(mysql_query("SELECT * FROM statistik WHERE online > '$bataswaktu'"));
+  $pengunjungonline = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM statistik WHERE online > '$bataswaktu'"));
 
   $path = "counter/";
   $ext = ".png";
@@ -149,14 +149,14 @@
 
 
 // Bagian Option
-elseif ($_GET[module]=='option'){
+elseif ($_GET['module']=='option'){
   if ($_SESSION['leveluser']=='admin'){
     include "modul/mod_option/option.php";
   }
 }
 
 // (BARU) Bagian Header
-elseif ($_GET[module]=='header'){
+elseif ($_GET['module']=='header'){
   if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
     include "modul/mod_header/header.php";
   }
@@ -193,14 +193,14 @@ elseif ($_GET['module']=='profil'){
 }
 
 // Bagian Testimoni
-elseif ($_GET[module]=='testimoni'){
+elseif ($_GET['module']=='testimoni'){
    if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
     include "modul/mod_testimoni/testimoni.php";
   }
 }
 // Bagian User
 elseif ($_GET['module']=='user'){
-  if ($_SESSION['leveluser']=='admin' OR $_SESSION[leveluser]=='user'){
+  if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
     include "modul/mod_users/users.php";
   }
 }
@@ -353,7 +353,7 @@ elseif ($_GET['module']=='sekilasinfo'){
 
 
 // Bagian YM
-elseif ($_GET[module]=='ym'){
+elseif ($_GET['module']=='ym'){
    if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
     include "modul/mod_ym/ym.php";
   }
@@ -361,7 +361,7 @@ elseif ($_GET[module]=='ym'){
 
 
 // Bagian Logo
-elseif ($_GET[module]=='logo'){
+elseif ($_GET['module']=='logo'){
   if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
     include "modul/mod_logo/logo.php";
   }
@@ -415,8 +415,8 @@ elseif ($_GET['module']=='member'){
 
   
   // Bagian Background
-  elseif ($_GET[module]=='background'){
-  if ($_SESSION['leveluser']=='admin' OR $_SESSION[leveluser]=='user'){
+  elseif ($_GET['module']=='background'){
+  if ($_SESSION['leveluser']=='admin' OR $_SESSION['leveluser']=='user'){
   include "modul/mod_background/background.php";}}   
 
 

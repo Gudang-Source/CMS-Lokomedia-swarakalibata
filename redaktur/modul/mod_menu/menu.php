@@ -1,5 +1,7 @@
 <?php
-session_start();
+if(!isset($_SESSION)) { 
+  session_start(); 
+}
  if (empty($_SESSION['username']) AND empty($_SESSION['passuser'])){
  echo "
   </head>
@@ -22,12 +24,12 @@ session_start();
   else{
 
   //cek hak akses user
-  $cek=user_akses($_GET[module],$_SESSION[sessid]);
-  if($cek==1 OR $_SESSION[leveluser]=='admin'){
+  $cek=user_akses($_GET['module'],$_SESSION['sessid']);
+  if($cek==1 OR $_SESSION['leveluser']=='admin'){
 
 
   $aksi="modul/mod_menu/aksi_menu.php";
-  switch($_GET[act]){
+  switch(isset($_GET['act']) ? $_GET['act']:''){
   // Tampil Menu Utama
   default:
   
@@ -62,17 +64,17 @@ session_start();
    </thead>
    <tbody>";
 		  
-   $tampil=mysql_query("SELECT * FROM menu");
+   $tampil=mysqli_query($conn,"SELECT * FROM menu");
    $no=1;
-   while ($r=mysql_fetch_array($tampil)){
+   while ($r=mysqli_fetch_array($tampil)){
 	
    echo "<tr class=gradeX> 
    <td>$r[nama_menu]</td>";
             
-  $parent=mysql_query("SELECT * FROM menu WHERE id_menu=$r[id_parent]");
-  $jml=mysql_num_rows($parent);
+  $parent=mysqli_query($conn,"SELECT * FROM menu WHERE id_menu=$r[id_parent]");
+  $jml=mysqli_num_rows($parent);
   if ($jml > 0){
-  while($s=mysql_fetch_array($parent)){
+  while($s=mysqli_fetch_array($parent)){
   
   echo"<td>$s[nama_menu]</td>"; }}
   
@@ -116,8 +118,8 @@ session_start();
    <label for=field4>Level Menu</label>
    <select name='id_parent'>
    <option value=0 selected>Menu Utama</option>";
-   $tampil=mysql_query("SELECT * FROM menu ORDER BY id_menu");
-   while($r=mysql_fetch_array($tampil)){
+   $tampil=mysqli_query($conn,"SELECT * FROM menu ORDER BY id_menu");
+   while($r=mysqli_fetch_array($tampil)){
    echo "<option value=$r[id_menu]>$r[nama_menu]</option>
    </p>";}
    
@@ -131,18 +133,18 @@ session_start();
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=menu'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=menu'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-  <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+  <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
 	 
    break;
 
     case "editmenu":
-    $edit = mysql_query("SELECT * FROM menu WHERE id_menu='$_GET[id]'");
-    $r    = mysql_fetch_array($edit);
+    $edit = mysqli_query($conn,"SELECT * FROM menu WHERE id_menu='$_GET[id]'");
+    $r    = mysqli_fetch_array($edit);
 
 		  
    echo "
@@ -169,13 +171,13 @@ session_start();
    <p class=inline-small-label> 
    <label for=field4>Level Menu</label>
    <select name='id_parent'>";
-   $tampil=mysql_query("SELECT * FROM menu ORDER BY id_menu");
+   $tampil=mysqli_query($conn,"SELECT * FROM menu ORDER BY id_menu");
    if ($r[parent_id]==0){
    echo "<option value=0 selected>Menu Utama</option>";}
    else {
    echo "<option value=0>Menu Utama</option>";}
 
-   while($w=mysql_fetch_array($tampil)){
+   while($w=mysqli_fetch_array($tampil)){
    if ($r[id_parent]==$w[id_menu]){
    echo "<option value=$w[id_menu] selected>$w[nama_menu]</option>";}
    else{
@@ -186,7 +188,7 @@ session_start();
            
    echo "</select>";
 	
-   if ($r[aktif]=='Ya'){
+   if ($r['aktif']=='Ya'){
    echo "
    <p class=inline-small-label> 
    <label for=field4>Aktif</label>
@@ -213,11 +215,11 @@ session_start();
    <div class=block-actions> 
    <ul class=actions-right> 
    <li>
-   <a class='button red' id=reset-validate-form href='?module=menu'>Batal</a>
+   <a class='button red' id='reset-validate-form' href='?module=menu'>Batal</a>
    </li> </ul>
    <ul class=actions-left> 
    <li>
-   <input type='submit' name='upload' class='button' value=' &nbsp;&nbsp;&nbsp;&nbsp; Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
+   <input type='submit' name='upload' class='button' value=' Simpan &nbsp;&nbsp;&nbsp;&nbsp;'>
    </form>";
   
   
